@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#121314">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 20 25%27%3E%3Crect x=%271%27 y=%271%27 width=%2718%27 height=%2723%27 rx=%272.5%27 fill=%27%23050505%27/%3E%3Crect x=%2713%27 y=%271%27 width=%273%27 height=%2723%27 fill=%27%23f3c623%27/%3E%3C/svg%3E">
+<title>BLACKBOOK — Setup Book</title>
+<style>
+:root{
+  --bg:#121314;--panel:#1b1d1f;--panel2:#24272a;--line:#34383c;--ink:#ece8df;--mute:#9b9890;
+  --blue:#2c64c8;--yel:#f3c623;--red:#e2553f;--dro:#b9f3a2;
+  --mono:ui-monospace,"SF Mono","Roboto Mono","Cascadia Mono","Droid Sans Mono",Menlo,Consolas,monospace;
+  --cond:"Avenir Next Condensed","sans-serif-condensed","Roboto Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font:16px/1.4 var(--body);min-height:100vh;
+  background-image:linear-gradient(rgba(255,255,255,.026) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.026) 1px,transparent 1px);background-size:22px 22px}
+a{color:#8fb3f0}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#app{max-width:720px;margin:0 auto;padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+#app.wizmode{padding-bottom:0}
+#app.wizmode #top{display:none}
+header#top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;background:rgba(18,19,20,.95)}
+.brand{display:flex;align-items:center;gap:9px;cursor:pointer;min-width:0}
+.brand b{font-family:var(--cond);font-weight:800;letter-spacing:.2em;font-size:21px}
+.brand small{color:var(--mute);font:600 12px var(--cond);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.icon{background:none;border:1px solid var(--line);border-radius:10px;min-width:44px;min-height:44px;display:grid;place-items:center;color:var(--ink)}
+.icon svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
+.tape{height:5px;background:var(--yel);background-image:repeating-linear-gradient(90deg,rgba(0,0,0,0) 0 60px,rgba(0,0,0,.08) 60px 62px)}
+/*bn*/.bn{margin:10px 14px 0;padding:10px 12px;border-radius:10px;font-size:14px;display:flex;gap:10px;align-items:flex-start;background:#17202e;border:1px solid #2a3c5a}
+.bn.bad{background:#2a1513;border-color:#5a2a24}
+.bn p{flex:1}
+.bn > button{background:none;border:0;color:var(--mute);font-size:18px;min-width:28px}
+
+/* nav */
+#nav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(5,1fr);align-items:end;max-width:720px;margin:0 auto;background:#0b0c0d;border-top:1px solid var(--line);padding:4px 6px calc(6px + env(safe-area-inset-bottom))}
+#nav[hidden]{display:none}
+#nav button{background:none;border:0;color:var(--mute);font:700 11px var(--cond);letter-spacing:.1em;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;min-height:54px;justify-content:center}
+#nav button svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8}
+#nav button.on{color:var(--ink)}
+#nav button.on svg{stroke:var(--yel)}
+#nav .fab{width:64px;height:64px;border-radius:16px;background:var(--yel);color:#111;margin:-24px auto 2px;box-shadow:0 6px 18px rgba(0,0,0,.55),inset 0 -4px 0 rgba(0,0,0,.22);font:800 11px var(--cond)}
+#nav .fab svg{stroke:#111;stroke-width:2.6;width:26px;height:26px}
+
+/* type + layout */
+.sec{margin:22px 14px 8px;font:800 13px var(--cond);letter-spacing:.18em;text-transform:uppercase;color:var(--mute);display:flex;align-items:center;gap:8px}
+.sec::after{content:'';flex:1;height:1px;background:var(--line)}
+.sec .cnt{color:var(--ink)}
+.hint{color:var(--mute);font-size:14px;margin:6px 0}
+.pad{padding:0 14px}
+.muted{color:var(--mute)}
+.mono{font-family:var(--mono)!important;letter-spacing:.02em}
+.backbar{display:flex;align-items:center;gap:10px;padding:10px 14px 0}
+.backbar span{font:700 13px var(--cond);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:50px;padding:0 18px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);font:800 15px var(--cond);letter-spacing:.08em;text-transform:uppercase;text-decoration:none;text-align:center}
+.btn.go{background:var(--yel);color:#111;border-color:#c9a01a}
+.btn.ghost{background:transparent}
+.btn.danger{color:var(--red);border-color:#5a2a24;background:transparent}
+.btn.rec{color:#fff;background:#8f2a1f;border-color:#b53a2b}
+.btn.sm{min-height:42px;padding:0 12px;font-size:13px}
+.btn.wide{width:100%;margin-top:8px}
+.btn:disabled{opacity:.35}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin:14px}
+.btns .btn{flex:1 1 40%}
+.link{background:none;border:0;color:#8fb3f0;font-weight:600;padding:8px 0;text-align:left}
+
+/* inputs */
+input,textarea,select{width:100%;background:#0c0d0e;border:1px solid var(--line);border-radius:9px;color:var(--ink);font:16px/1.35 var(--body);padding:12px;letter-spacing:normal;text-transform:none}
+textarea{resize:vertical}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--yel);outline-offset:-1px;border-color:transparent}
+input.big{font-size:22px;padding:14px}
+input.up{text-transform:uppercase}
+input.huge{font-size:34px;font-weight:700;text-align:center;padding:8px}
+.fl{display:block;font:800 12px var(--cond);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:16px 0 0}
+.fl>input,.fl>textarea,.fl>select{margin-top:6px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.check{display:flex;gap:12px;align-items:flex-start;margin:16px 0;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.check input{width:24px;height:24px;flex:none;accent-color:var(--yel);margin-top:1px}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chips.scroll{flex-wrap:nowrap;overflow-x:auto;padding:0 14px;margin:10px 0 2px;scrollbar-width:none}
+.chips.scroll::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--panel2);color:var(--ink);border-radius:999px;padding:8px 13px;font:600 14px var(--body);min-height:40px;white-space:nowrap}
+.chip.on{background:var(--blue);border-color:#4b82e0}
+.chip small{color:var(--mute);margin-left:4px}
+.chip.on small{color:#dfe8ff}
+
+/* search */
+.searchwrap{padding:14px 14px 4px;position:relative}
+.searchwrap input{font:700 20px var(--mono);padding:16px 48px 16px 46px;border-radius:12px;border:2px solid #3a3e42;background:#0a0b0c}
+.searchwrap svg{position:absolute;left:28px;top:31px;width:22px;height:22px;stroke:var(--mute);fill:none;stroke-width:2;pointer-events:none}
+.searchwrap .clr{position:absolute;right:22px;top:24px;width:36px;height:36px;border:0;background:none;color:var(--mute);font-size:22px}
+.reshead{display:flex;justify-content:space-between;align-items:center;margin:10px 14px 0;font:700 12px var(--cond);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+
+/* DRO readouts */
+.ro{background:#060707;border:1px solid #2a2d30;border-radius:8px;padding:7px 10px 8px;min-width:0}
+.ro span{display:block;font:800 10px var(--cond);letter-spacing:.18em;color:var(--mute)}
+.ro b{display:block;font:700 22px/1.15 var(--mono);color:var(--dro);text-shadow:0 0 10px rgba(185,243,162,.18);overflow-wrap:anywhere}
+.ro b i{color:#3c4040;font-style:normal;text-shadow:none}
+.dro{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px;margin:14px}
+.dro .ro b{font-size:26px}
+.ro.lk span::after{content:' ◆';color:var(--yel)}
+
+/* setup rows */
+.srow{display:block;text-decoration:none;color:inherit;background:var(--panel);border:1px solid var(--line);border-left:6px solid #3a3d40;border-radius:10px;padding:12px;margin:10px 14px}
+.srow.ok{border-left-color:var(--yel)}
+.srow.stale{border-left-color:var(--red)}
+.srow-h{display:flex;align-items:center;gap:8px}
+.pn{font:700 20px var(--mono);letter-spacing:.02em;overflow-wrap:anywhere}
+.rev{flex:none;font:800 11px var(--cond);letter-spacing:.12em;border:1px solid var(--line);border-radius:4px;padding:2px 6px;color:var(--mute)}
+.srow-op{color:var(--mute);font-size:14px;margin:2px 0 9px}
+.srow-op em{font-style:normal;color:#8fb3f0}
+.srow-ro{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px}
+.srow .ro b{font-size:16px}
+.mini{margin-left:auto;flex:none;width:30px;height:30px;border:2px solid var(--yel);border-radius:50%;color:var(--yel);display:grid;place-items:center;font:800 11px var(--cond);transform:rotate(-12deg)}
+.mini.stale{border-color:var(--red);color:var(--red)}
+.notin{margin:12px 14px;padding:14px;border:2px dashed #4a4e52;border-radius:12px;display:flex;align-items:center;gap:12px}
+.notin div{flex:1}
+.notin b{font-family:var(--mono);font-size:18px}
+
+/* setup detail */
+.shead{position:relative;padding:12px 14px 0;min-height:118px}
+.pnxl{font:800 30px/1.1 var(--mono);letter-spacing:.01em;padding-right:112px;overflow-wrap:anywhere}
+.shead .sub{display:flex;gap:8px;align-items:center;margin-top:6px;padding-right:112px;font-size:17px}
+.shead .sub2{color:var(--mute);margin-top:4px;padding-right:112px;font-size:14px}
+.stampslot{position:absolute;right:8px;top:4px}
+.warn{color:#ffb3a6}
+.toolref{margin:-6px 14px 0;display:flex;flex-wrap:wrap;gap:6px}
+.toolref a{font:700 12px var(--mono);color:#2a2418;background:#d8c79c;border-radius:4px;padding:4px 8px;text-decoration:none}
+.kvt{margin:0 14px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.kvt div{display:flex;justify-content:space-between;gap:12px;padding:11px 12px;border-top:1px solid var(--line);background:var(--panel)}
+.kvt div:first-child{border-top:0}
+.kvt span{color:var(--mute)}
+.kvt b{font-family:var(--mono);text-align:right;overflow-wrap:anywhere}
+ol.steps{margin:0 14px;list-style:none;counter-reset:s}
+ol.steps li{counter-increment:s;position:relative;padding:11px 12px 11px 50px;background:var(--panel);border:1px solid var(--line);border-radius:9px;margin-bottom:6px;white-space:pre-wrap}
+ol.steps li::before{content:counter(s);position:absolute;left:11px;top:9px;width:27px;height:27px;border-radius:50%;background:var(--blue);display:grid;place-items:center;font:700 14px var(--mono);color:#fff}
+.haz{margin:14px;border:1px solid #5d4c12;border-radius:10px;overflow:hidden;background:#1c190e}
+.haz::before{content:'';display:block;height:10px;background:repeating-linear-gradient(-45deg,var(--yel) 0 10px,#111 10px 20px)}
+.haz h4{font:800 13px var(--cond);letter-spacing:.18em;text-transform:uppercase;color:var(--yel);padding:10px 12px 0}
+.haz p{padding:6px 12px 12px;white-space:pre-wrap}
+.ph-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:0 14px}
+.ph{position:relative;min-width:0}
+.ph-img{aspect-ratio:1/1;background:#000 center/cover no-repeat;border-radius:8px;border:1px solid var(--line);cursor:zoom-in}
+.ph figcaption{font:700 12px var(--cond);letter-spacing:.08em;text-transform:uppercase;color:var(--mute);padding:5px 2px}
+.ph select{margin-top:6px;padding:8px;font-size:14px}
+.ph .x{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.7)}
+.aud{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px;margin:0 0 8px}
+.aud audio{width:100%;height:40px}
+.aud-meta{display:flex;align-items:center;gap:8px;margin-top:4px;font-size:14px}
+.aud-meta span{flex:1}
+.aud-meta small{color:var(--mute);font-family:var(--mono)}
+.auds{margin:0 14px}
+.gaprow{margin:10px 14px}
+.gap{display:inline-block;font:800 11px var(--cond);letter-spacing:.1em;text-transform:uppercase;color:#ffb8ab;border:1px solid #5a2a24;background:#2a1513;border-radius:4px;padding:4px 8px;margin:2px 2px 2px 0}
+.okline{margin:10px 14px;color:var(--dro);font:800 13px var(--cond);letter-spacing:.14em;text-transform:uppercase}
+.meta{margin:18px 14px;color:var(--mute);font-size:13px;line-height:1.6}
+.verify{margin:14px;padding:14px;border:1px dashed #6b5a1a;border-radius:12px;background:#1a180f}
+.verify p{font-size:14px;color:#d9d2bd;margin-bottom:10px}
+
+/* stamp */
+.stamp{width:108px;height:108px;color:var(--yel);transform:rotate(-9deg);opacity:.95;display:block}
+.stampwrap{position:relative;display:inline-block}
+.stampwrap.stale .stamp{color:#6f6f6f}
+.stampwrap .void{position:absolute;left:-8px;right:-8px;top:42%;transform:rotate(-18deg);background:var(--red);color:#fff;font:800 12px var(--cond);letter-spacing:.14em;text-align:center;padding:3px 0}
+
+/* wizard */
+.wiz{min-height:100vh;display:flex;flex-direction:column}
+.wiz-top{display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top)) 14px 8px}
+.wiz-title{flex:1;font:800 18px var(--cond);letter-spacing:.1em;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wiz-n{font:700 14px var(--mono);color:var(--mute)}
+.strip{display:flex;gap:4px;padding:0 14px;overflow-x:auto;scrollbar-width:none}
+.strip::-webkit-scrollbar{display:none}
+.st{flex:1 1 0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:none;border:0;border-top:4px solid #2c2f32;color:var(--mute);font:800 10px var(--cond);letter-spacing:.05em;text-transform:uppercase;padding:7px 1px;min-height:36px}
+.st.done{border-top-color:#8a7215}
+.st.on{border-top-color:var(--yel);color:var(--ink)}
+.wiz-body{flex:1;padding:8px 14px 130px}
+.wiz-body h2{font:800 24px var(--cond);letter-spacing:.06em;text-transform:uppercase;margin:12px 0 2px}
+.wiz-bar{position:fixed;left:0;right:0;bottom:0;max-width:720px;margin:0 auto;display:flex;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:#0b0c0d;border-top:1px solid var(--line);z-index:30}
+.wiz-bar .btn.go{flex:2}
+.wiz-bar .btn.ghost{flex:1}
+.slot{margin:16px 0;padding:14px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.slot-h{font:800 13px var(--cond);letter-spacing:.18em;text-transform:uppercase;color:var(--mute);margin:0 0 8px}
+.slot-h.hz{color:var(--yel);margin-top:20px}
+.linked{margin-top:8px;font-size:14px;color:#d8c79c;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.linked .x{min-height:32px;padding:0 10px;min-width:0;font-size:13px}
+.kv{display:grid;grid-template-columns:1fr 1fr 44px;gap:6px;margin-bottom:6px}
+.x{background:none;border:1px solid var(--line);color:var(--mute);border-radius:8px;min-width:40px;min-height:40px;display:grid;place-items:center}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.tile{background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:10px;color:var(--ink);text-align:left;display:flex;flex-direction:column;gap:3px;min-height:132px}
+.tile.on{border-color:var(--yel);background:#232010}
+.tile b{font-size:16px}
+.tile small{color:var(--mute)}
+.tile-ph{height:76px;border-radius:8px;background:#0a0b0c center/cover no-repeat;display:grid;place-items:center;color:#3e4348;margin-bottom:4px}
+.tile.add{align-items:center;justify-content:center;border-style:dashed;color:var(--mute);font:800 15px var(--cond);letter-spacing:.1em;text-transform:uppercase}
+.psi{display:flex;align-items:center;gap:8px}
+.psi .btn{min-width:64px;padding:0}
+.psi .unit{font:800 14px var(--cond);letter-spacing:.14em;color:var(--mute)}
+.steps-ed{list-style:none;counter-reset:e}
+.steps-ed li{counter-increment:e;display:grid;grid-template-columns:30px 1fr;gap:8px;margin-bottom:8px}
+.steps-ed li::before{content:counter(e);width:28px;height:28px;border-radius:50%;background:var(--blue);display:grid;place-items:center;font:700 13px var(--mono);margin-top:10px;color:#fff}
+.mv{grid-column:2;display:flex;gap:6px;justify-content:flex-end}
+.mv button{min-height:34px;min-width:44px}
+.recrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.recrow .btn,.recrow label.btn{flex:1}
+.phadd{display:flex;gap:8px;margin-top:12px}
+.phadd .btn{flex:1}
+.review{margin:10px 0}
+.review .pn{font-size:26px}
+.review .dro{margin:12px 0}
+.dup{margin-top:10px;padding:10px 12px;border-radius:10px;background:#17202e;border:1px solid #2a3c5a;font-size:14px}
+
+/* machines */
+.mrow{display:flex;gap:12px;align-items:center;text-decoration:none;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px;margin:10px 14px}
+.mrow .tile-ph{width:76px;height:76px;flex:none;margin:0}
+.mrow b{display:block;font-size:17px}
+.mrow small{color:var(--mute);display:block}
+.mrow .nums{margin-left:auto;text-align:right;font:700 13px var(--mono);color:var(--mute);flex:none}
+.mrow .nums b{font-size:22px;color:var(--ink)}
+.mhero{height:190px;margin:12px 14px 0;border-radius:12px;background:#0a0b0c center/cover no-repeat;border:1px solid var(--line);display:grid;place-items:center;color:#3e4348;position:relative;overflow:hidden}
+.mhero label{position:absolute;right:10px;bottom:10px}
+.mtitle{margin:12px 14px 0}
+.mtitle h2{font:800 26px var(--cond);letter-spacing:.04em}
+.mtitle p{color:var(--mute)}
+.badge{display:inline-block;font:800 11px var(--cond);letter-spacing:.12em;text-transform:uppercase;border:1px solid #2a3c5a;background:#17202e;color:#a9c2ee;border-radius:4px;padding:3px 7px;margin:6px 4px 0 0}
+.qa{margin:10px 14px;padding:12px;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:10px}
+.qa.done{border-left-color:var(--dro)}
+.qa .q{font-weight:700;margin-bottom:8px}
+.qa .aud{margin-top:8px;background:#141617}
+.qaadd{display:flex;gap:8px;margin:10px 14px}
+.qaadd .btn{flex:none}
+
+/* crib tags */
+.tags{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:12px 14px}
+.tag{position:relative;display:block;text-decoration:none;color:#2a2418;background:#d8c79c;padding:30px 12px 12px;min-height:150px;
+  clip-path:polygon(20px 0,calc(100% - 20px) 0,100% 20px,100% 100%,0 100%,0 20px);
+  background-image:linear-gradient(rgba(60,45,10,.07) 1px,transparent 1px);background-size:100% 19px;background-position:0 8px}
+.tag::before{content:'';position:absolute;top:9px;left:50%;width:13px;height:13px;margin-left:-6.5px;border-radius:50%;background:var(--bg);box-shadow:0 0 0 3px #b9a777}
+.tag .code{font:800 21px/1.1 var(--mono);color:#16120a;overflow-wrap:anywhere}
+.tag .nm{font-size:13px;margin-top:4px}
+.tag .sz{font:700 13px var(--mono);margin-top:4px}
+.tag .loc{font:800 11px var(--cond);letter-spacing:.12em;text-transform:uppercase;color:#6b5d3d;margin-top:8px}
+.tag .use{position:absolute;top:6px;right:22px;font:800 11px var(--mono);color:#6b5d3d}
+.tag.big{margin:12px 14px;min-height:0;padding:34px 18px 18px}
+.tag.big .code{font-size:32px}
+.tagph{height:120px;margin:0 14px;border-radius:10px;background:#0a0b0c center/cover no-repeat;border:1px solid var(--line);display:grid;place-items:center;color:var(--mute)}
+
+/* gaps */
+.meter{margin:14px;padding:16px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.meter .big{font:800 46px/1 var(--mono)}
+.meter .big small{font-size:18px;color:var(--mute)}
+.meter p{color:var(--mute);margin-top:4px}
+.bar{height:14px;border-radius:7px;background:#0a0b0c;overflow:hidden;margin-top:12px;border:1px solid var(--line)}
+.bar i{display:block;height:100%;background:repeating-linear-gradient(-45deg,var(--yel) 0 8px,#d4a915 8px 16px)}
+.pnchips{display:flex;flex-wrap:wrap;gap:6px;margin:0 14px}
+.pnchip{display:inline-flex;align-items:center;gap:8px;border:1px dashed #575b60;border-radius:8px;padding:6px 6px 6px 10px;font:700 14px var(--mono);background:var(--panel)}
+.pnchip button{border:0;background:var(--yel);color:#111;border-radius:6px;font:800 12px var(--cond);letter-spacing:.08em;text-transform:uppercase;min-height:32px;padding:0 10px}
+.pnchip.done{border-style:solid;border-color:#3d5a33;color:var(--dro)}
+.mq{display:flex;justify-content:space-between;align-items:center;text-decoration:none;color:inherit;margin:8px 14px;padding:12px;background:var(--panel);border:1px solid var(--line);border-radius:10px}
+.mq b{font:700 16px var(--mono);color:var(--yel)}
+
+/* empty */
+.empty{margin:18px 14px;padding:20px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+.empty h2{font:800 26px/1.1 var(--cond);letter-spacing:.04em;text-transform:uppercase}
+.empty ol{margin:12px 0 4px 20px;color:#cfcbc2}
+.empty li{margin:6px 0}
+
+/* modal */
+#modal{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.74);display:flex;align-items:flex-end;justify-content:center}
+#modal[hidden]{display:none}
+.mbox{width:100%;max-width:720px;max-height:92vh;overflow:auto;background:var(--panel);border-top:4px solid var(--yel);border-radius:16px 16px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom))}
+.mbox h3{font:800 21px var(--cond);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+.mbox p{color:#cfcbc2}
+.mbar{display:flex;gap:10px;margin-top:18px}
+.mbar .btn{flex:1}
+.viewer{background:#000;padding:10px;border-top-color:#000}
+.viewer img{display:block;max-width:100%;max-height:74vh;margin:0 auto;border-radius:6px}
+.viewer p{text-align:center;color:var(--mute);margin-top:8px;font:700 13px var(--cond);letter-spacing:.1em;text-transform:uppercase}
+.recbox{text-align:center}
+.recdot{width:22px;height:22px;border-radius:50%;background:var(--red);display:inline-block;animation:pulse 1s infinite;vertical-align:middle;margin-right:10px}
+@keyframes pulse{50%{opacity:.25}}
+.rectime{font:800 54px var(--mono);margin:14px 0}
+#toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom));transform:translate(-50%,16px);opacity:0;transition:.25s;background:#000;border:1px solid var(--yel);color:var(--ink);padding:10px 16px;border-radius:999px;font-weight:600;z-index:60;pointer-events:none;max-width:90vw;text-align:center;font-size:15px}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+.setrow{margin:0 14px}
+.small{font-size:13px}
+
+/* print */
+#print{display:none}
+@page{size:letter;margin:.4in}
+@media print{
+  body{background:#fff!important;color:#000}
+  #app,#modal,#toast{display:none!important}
+  #print{display:block}
+  .psheet{font:11pt/1.35 Arial,Helvetica,sans-serif;color:#000;page-break-after:always;break-after:page;position:relative}
+  .psheet:last-child{page-break-after:auto;break-after:auto}
+  .ptop{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #000;padding-bottom:8px}
+  .ppn{font:bold 26pt/1.05 "Courier New",monospace}
+  .psub{font-size:12pt;margin-top:4px}
+  .pbrand{font:bold 9pt Arial;letter-spacing:.2em;color:#555;text-align:right}
+  .pro{display:flex;gap:8px;margin:12px 0}
+  .pro div{flex:1;border:2px solid #000;padding:6px 8px}
+  .pro span{display:block;font:bold 8pt Arial;letter-spacing:.15em;color:#444}
+  .pro b{font:bold 18pt "Courier New",monospace}
+  .ptab{width:100%;border-collapse:collapse;margin:6px 0 10px}
+  .ptab td{border:1px solid #999;padding:4px 6px;vertical-align:top}
+  .ptab td:first-child{width:38%;color:#333}
+  .ptab td:last-child{font-family:"Courier New",monospace;font-weight:bold}
+  .ph4{font:bold 9pt Arial;letter-spacing:.15em;text-transform:uppercase;margin:10px 0 4px;color:#333}
+  .psteps{margin-left:20px}
+  .psteps li{margin:2px 0;white-space:pre-wrap}
+  .pwatch{border-left:8px solid #000;padding:6px 10px;background:#f2f2f2;white-space:pre-wrap}
+  .pphotos{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .pphotos figure{width:2.35in}
+  .pphotos img{width:2.35in;height:1.8in;object-fit:cover;border:1px solid #999}
+  .pphotos figcaption{font-size:8pt;color:#444}
+  .pfoot{margin-top:12px;border-top:1px solid #999;padding-top:4px;font-size:8pt;color:#555}
+  .pstamp .stamp{color:#1f3f9a;width:1.1in;height:1.1in}
+  .pstamp .stampwrap.stale .stamp{color:#999}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="top">
+    <div class="brand" data-act="home">
+      <svg width="20" height="25" viewBox="0 0 20 25" aria-hidden="true"><rect x="1" y="1" width="18" height="23" rx="2.5" fill="#050505" stroke="#4a4e52"/><rect x="13" y="1" width="3" height="23" fill="#f3c623"/></svg>
+      <b>BLACKBOOK</b><small id="shopName"></small>
+    </div>
+    <button class="icon" data-act="nav" data-to="#more" aria-label="Backup and settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg></button>
+  </header>
+  <div class="tape"></div>
+  <div id="banner"></div>
+  <main id="view"></main>
+  <nav id="nav">
+    <button data-act="nav" data-to="#" data-v=""><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.2"/><path d="M15.2 15.2l5.3 5.3"/></svg>Lookup</button>
+    <button data-act="nav" data-to="#machines" data-v="machines"><svg viewBox="0 0 24 24"><path d="M5 3h12v5h-3.5V6.2H8.5v11.6h5v-1.9H17V21H5z"/><path d="M15.2 8.2v2.6M15.2 13.2v2.6"/></svg>Machines</button>
+    <button class="fab" data-act="newSetup" aria-label="Capture a setup"><svg viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg>Capture</button>
+    <button data-act="nav" data-to="#crib" data-v="crib"><svg viewBox="0 0 24 24"><path d="M3.5 11.5V4h7.5l9.5 9.5-7.5 7.5z"/><circle cx="7.8" cy="8.3" r="1.5"/></svg>Crib</button>
+    <button data-act="nav" data-to="#gaps" data-v="gaps"><svg viewBox="0 0 24 24"><path d="M12 3.5l9.5 17h-19z"/><path d="M12 10v5M12 17.6v.4"/></svg>Gaps</button>
+  </nav>
+</div>
+<div id="modal" hidden></div>
+<div id="toast"></div>
+<div id="print"></div>
+
+<script>
+'use strict';
+/* ============ helpers ============ */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=(p='')=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const now=()=>Date.now();
+const normPN=s=>String(s||'').toUpperCase().replace(/[\s\-_.\/]/g,'');
+const clone=o=>JSON.parse(JSON.stringify(o));
+const initials=n=>String(n||'').trim().split(/\s+/).filter(Boolean).map(w=>w[0]).join('').slice(0,3).toUpperCase()||'OK';
+const fmtDur=s=>{s=Math.max(0,Math.round(s||0));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+const fmtDate=t=>{if(!t)return '';const d=new Date(t);return (d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2)};
+function ago(t){if(!t)return 'never';const s=(now()-t)/1000;if(s<90)return 'just now';if(s<3600)return Math.round(s/60)+' min ago';if(s<86400)return Math.round(s/3600)+' h ago';return Math.round(s/86400)+' days ago'}
+function setPath(o,p,v){const k=p.split('.');let t=o;for(let i=0;i<k.length-1;i++)t=t[k[i]];t[k[k.length-1]]=v}
+function upsert(arr,r){const i=arr.findIndex(x=>x.id===r.id);if(i<0)arr.push(r);else arr[i]=r}
+const IN_FRAME=(()=>{try{return window.self!==window.top}catch(e){return true}})();
+
+const OPS=['Dimple','Rivet','Punch','Flare','Countersink','Form','Trim','Press in'];
+const MATS=['2024-T3','7075-T6','6061-T6','Ti 6Al-4V','321 SS','Inconel 625'];
+const CAPS=['Overall setup','Upper tool','Lower tool','Part loaded','Good part','Bad part','Gauge / check','Other'];
+const MTYPES=['Pneumatic C-frame press','Rivet squeezer','Dimpler','Arbor press','Punch / notcher','Press brake','Roll','Hydroform','Other'];
+const TKINDS=['Upper','Lower','Punch','Die','Rivet set','Anvil','Pin / locator','Shim','Gauge','Other'];
+const EXTRA_Q=['Shims','Locator pin','Stripper','Spacer','Backup bar','Fixture'];
+const SET_Q=['Stop / fence','Stroke / depth','Shut height','Dwell','Hits per hole','Fastener','Part orientation','Lube'];
+const STEPS=['Part','Machine','Tooling','Settings','How-to','Photos','Review'];
+function seedQA(air){
+  const q=['What do you check first, before running anything on this machine?',
+    air?'How do you know the air pressure is right? What happens if it is off?':null,
+    'What goes wrong most often, and how do you fix it?',
+    'Which parts are tricky on this machine, and why?',
+    'How do you change the tooling? Any tricks to it?',
+    'What should nobody ever do on this machine?',
+    'Where are the tools, shims and spare parts kept?'].filter(Boolean);
+  return q.map(x=>({id:uid('q'),q:x,a:'',audio:[]}));
+}
+const ICON_C='<svg viewBox="0 0 48 48" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M10 6h25v10h-7v-4H17v24h11v-4h7v10H10z"/><path d="M31.5 16v6M31.5 32v-6"/></svg>';
+
+/* ============ storage ============ */
+const STORES=['machines','tools','setups','blobs','meta'];
+const Store={
+  mode:'idb',db:null,mem:{},
+  async init(){
+    try{
+      if(!window.indexedDB)throw new Error('no idb');
+      this.db=await new Promise((res,rej)=>{
+        const r=indexedDB.open('blackbook',1);
+        r.onupgradeneeded=()=>{const d=r.result;STORES.forEach(s=>{if(!d.objectStoreNames.contains(s))d.createObjectStore(s,{keyPath:'id'})})};
+        r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);r.onblocked=()=>rej(new Error('blocked'));
+        setTimeout(()=>rej(new Error('timeout')),5000);
+      });
+      await this.all('meta');
+    }catch(e){this.mode='mem';STORES.forEach(s=>this.mem[s]=new Map())}
+  },
+  _req(store,mode,fn){return new Promise((res,rej)=>{const t=this.db.transaction(store,mode);const q=fn(t.objectStore(store));t.oncomplete=()=>res(q&&q.result);t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error)})},
+  all(s){return this.mode==='mem'?Promise.resolve([...this.mem[s].values()]):this._req(s,'readonly',o=>o.getAll())},
+  get(s,id){return this.mode==='mem'?Promise.resolve(this.mem[s].get(id)):this._req(s,'readonly',o=>o.get(id))},
+  put(s,v){if(this.mode==='mem'){this.mem[s].set(v.id,v);return Promise.resolve()}return this._req(s,'readwrite',o=>o.put(v))},
+  del(s,id){if(!id)return Promise.resolve();if(this.mode==='mem'){this.mem[s].delete(id);return Promise.resolve()}return this._req(s,'readwrite',o=>o.delete(id))},
+  clear(s){if(this.mode==='mem'){this.mem[s].clear();return Promise.resolve()}return this._req(s,'readwrite',o=>o.clear())}
+};
+
+/* ============ state ============ */
+const S={machines:[],tools:[],setups:[],settings:{shop:'',me:'',expert:'',lastBackup:0},targets:[],draft:null,q:'',mf:'',route:{v:'',id:''},depth:0,lastHash:null};
+async function loadAll(){
+  for(const k of ['machines','tools','setups'])S[k]=await Store.all(k);
+  const st=await Store.get('meta','settings');if(st)S.settings={...S.settings,...st.data};
+  const tg=await Store.get('meta','targets');if(tg)S.targets=tg.data||[];
+  const dr=await Store.get('meta','draft');if(dr)S.draft=dr.data;
+}
+const timers={};
+function soon(key,fn,ms=400){clearTimeout(timers[key]);timers[key]=setTimeout(fn,ms)}
+const saveSettings=()=>soon('settings',()=>Store.put('meta',{id:'settings',data:S.settings}));
+const saveTargets=()=>Store.put('meta',{id:'targets',data:S.targets});
+const saveDraft=()=>soon('draft',()=>S.draft?Store.put('meta',{id:'draft',data:S.draft}):Store.del('meta','draft'),300);
+const saveMachineSoon=m=>soon('m'+m.id,()=>Store.put('machines',m),500);
+
+const machineById=id=>S.machines.find(m=>m.id===id);
+const toolById=id=>S.tools.find(t=>t.id===id);
+const setupById=id=>S.setups.find(s=>s.id===id);
+const setupsOn=mid=>S.setups.filter(s=>s.machineId===mid);
+const toolUses=tid=>S.setups.filter(s=>s.upper.toolId===tid||s.lower.toolId===tid);
+const toolLabel=t=>t?(t.code||t.size||t.name||'tool'):'';
+const showsPsi=s=>{const m=machineById(s.machineId);return (m?m.usesAir!==false:true)||!!String(s.psi||'').trim()};
+function stampState(s){if(!s.verified)return 'none';return s.verified.at<s.updated?'stale':'ok'}
+function setupGaps(s,stampNow){
+  const g=[],m=machineById(s.machineId);
+  if(!m)g.push('No machine');
+  if(!String(s.upper.size).trim()&&!String(s.lower.size).trim())g.push('No tool sizes');
+  if(m&&m.usesAir!==false&&!String(s.psi||'').trim())g.push('No PSI');
+  if(!s.steps.filter(x=>x.trim()).length&&!String(s.watch||'').trim()&&!s.audio.length)g.push('No how-to');
+  if(!s.photos.length)g.push('No photos');
+  if(!stampNow){const st=stampState(s);if(st==='none')g.push('Not verified');if(st==='stale')g.push('Changed after stamp')}
+  return g;
+}
+function blankSetup(pn=''){return{id:uid('s'),pn,rev:'',op:'',material:'',thk:'',machineId:'',upper:{toolId:'',size:''},lower:{toolId:'',size:''},extraTools:[],psi:'',settings:[],steps:[],watch:'',photos:[],audio:[],by:S.settings.me||'',verified:null,created:0,updated:0}}
+const snapshot=s=>JSON.stringify({...s,updated:0,created:0,verified:0});
+
+/* ============ blobs ============ */
+const urlCache=new Map();
+async function saveBlob(blob){const id=uid('b');await Store.put('blobs',{id,type:blob.type,blob,created:now()});urlCache.set(id,URL.createObjectURL(blob));return id}
+async function delBlob(id){if(!id)return;await Store.del('blobs',id);if(urlCache.has(id)){URL.revokeObjectURL(urlCache.get(id));urlCache.delete(id)}}
+async function blobURL(id){if(urlCache.has(id))return urlCache.get(id);const r=await Store.get('blobs',id);if(!r||!r.blob)return '';const u=URL.createObjectURL(r.blob);urlCache.set(id,u);return u}
+async function hydrate(root){for(const el of $$('[data-blob]',root)){const u=await blobURL(el.dataset.blob);if(!u)continue;if(el.tagName==='IMG'||el.tagName==='AUDIO')el.src=u;else el.style.backgroundImage=`url("${u}")`}}
+async function compressImage(file,max=1500,q=0.8){
+  let img;
+  try{img=await createImageBitmap(file,{imageOrientation:'from-image'})}catch(e){
+    img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=URL.createObjectURL(file)});
+  }
+  const w=img.width,h=img.height,sc=Math.min(1,max/Math.max(w,h));
+  const c=document.createElement('canvas');c.width=Math.round(w*sc);c.height=Math.round(h*sc);
+  c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+  return await new Promise(r=>c.toBlob(b=>r(b||file),'image/jpeg',q));
+}
+const blobToB64=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]||'');r.onerror=rej;r.readAsDataURL(b)});
+function b64ToBlob(b64,type){const bin=atob(b64);const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type:type||'application/octet-stream'})}
+
+/* ============ UI bits ============ */
+function toast(msg,ms=2200){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(timers.toast);timers.toast=setTimeout(()=>t.classList.remove('show'),ms)}
+let confirmRes=null,modalLock=false;
+function openModal(html,cls=''){const m=$('#modal');m.innerHTML=`<div class="mbox ${cls}">${html}</div>`;m.hidden=false;hydrate(m)}
+function closeModal(){const m=$('#modal');m.hidden=true;m.innerHTML='';modalLock=false;if(confirmRes){const r=confirmRes;confirmRes=null;r(false)}}
+function ask(msgHtml,ok='OK',danger=false){return new Promise(r=>{openModal(`<p style="font-size:17px">${msgHtml}</p><div class="mbar"><button class="btn ghost" data-act="cNo">Cancel</button><button class="btn ${danger?'danger':'go'}" data-act="cYes">${esc(ok)}</button></div>`);confirmRes=r})}
+function choose(msgHtml,opts){return new Promise(r=>{openModal(`<p style="font-size:17px">${msgHtml}</p><div class="mbar" style="flex-direction:column">${opts.map((o,i)=>`<button class="btn ${o.cls||''}" data-act="cPick" data-i="${i}">${esc(o.label)}</button>`).join('')}</div>`);S.chooseOpts=opts;confirmRes=v=>r(v===false?null:v)})}
+const ro=(label,val,cls='')=>`<div class="ro ${cls}"><span>${esc(label)}</span><b>${String(val??'').trim()?esc(val):'<i>—</i>'}</b></div>`;
+function stampSVG(v,stale){
+  const k=uid('k'),name=esc(String(v.by||'Expert').toUpperCase().slice(0,22));
+  return `<span class="stampwrap ${stale?'stale':''}"><svg class="stamp" viewBox="0 0 120 120" role="img" aria-label="Verified by ${name}">
+  <defs><filter id="f${k}"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="${(v.at||0)%97}" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 1.75" result="m"/><feComposite in="SourceGraphic" in2="m" operator="in"/></filter>
+  <path id="t${k}" d="M13 60A47 47 0 0 1 107 60"/><path id="b${k}" d="M7 60A53 53 0 0 0 113 60"/></defs>
+  <g filter="url(#f${k})">
+  <circle cx="60" cy="60" r="56" fill="none" stroke="currentColor" stroke-width="4"/>
+  <circle cx="60" cy="60" r="43" fill="none" stroke="currentColor" stroke-width="1.6"/>
+  <text fill="currentColor" font-family="Arial Narrow,Arial,sans-serif" font-weight="700" font-size="11" letter-spacing="2.5"><textPath href="#t${k}" startOffset="50%" text-anchor="middle">VERIFIED SETUP</textPath></text>
+  <text fill="currentColor" font-family="Arial Narrow,Arial,sans-serif" font-weight="700" font-size="9.5" letter-spacing="1.5"><textPath href="#b${k}" startOffset="50%" text-anchor="middle">${name}</textPath></text>
+  <text x="60" y="66" fill="currentColor" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="28">${esc(v.init||'OK')}</text>
+  <line x1="34" y1="74" x2="86" y2="74" stroke="currentColor" stroke-width="1.4"/>
+  <text x="60" y="87" fill="currentColor" text-anchor="middle" font-family="Courier New,monospace" font-weight="700" font-size="10">${fmtDate(v.at)}</text>
+  </g></svg>${stale?'<span class="void">RE-VERIFY</span>':''}</span>`;
+}
+const backBar=t=>`<div class="backbar"><button class="icon" data-act="back" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><span>${esc(t)}</span></div>`;
+function audioList(arr,ctx,extra=''){return (arr||[]).map((a,i)=>`<div class="aud"><audio controls preload="none" data-blob="${esc(a.id)}"></audio><div class="aud-meta"><span>${esc(a.label||'Voice note')}</span><small>${fmtDur(a.dur)}</small>${ctx?`<button class="x" data-act="audDel" data-ctx="${ctx}" data-i="${i}" ${extra} aria-label="Delete">✕</button>`:''}</div></div>`).join('')}
+function setupRow(s){
+  const m=machineById(s.machineId),st=stampState(s);
+  return `<a class="srow ${st}" href="#setup-${s.id}">
+    <div class="srow-h"><span class="pn">${esc(s.pn||'—')}</span>${s.rev?`<span class="rev">REV ${esc(s.rev)}</span>`:''}${st!=='none'?`<span class="mini ${st}">${st==='ok'?esc(s.verified.init||'OK'):'!'}</span>`:''}</div>
+    <div class="srow-op">${esc(s.op||'')}${s.op?' · ':''}<em>${esc(m?m.name:'No machine')}</em></div>
+    <div class="srow-ro">${ro('UPPER',s.upper.size)}${ro('LOWER',s.lower.size)}${showsPsi(s)?ro('PSI',s.psi):''}</div></a>`;
+}
+function banners(){
+  const b=[];
+  if(Store.mode==='mem')b.push(`<div class="bn bad"><p><b>Storage is blocked in this browser.</b> Nothing you enter will be kept. Open the app in a normal browser tab.</p></div>`);
+  if(IN_FRAME&&!S.settings.hideFrameNote)b.push(`<div class="bn"><p><b>Preview inside Claude.</b> Voice recording and printing are blocked here, and data stays in this browser only. Host the file (GitHub Pages) for real shop use.</p><button data-act="dismissFrame" aria-label="Dismiss">✕</button></div>`);
+  $('#banner').innerHTML=b.join('');
+  $('#shopName').textContent=S.settings.shop||'';
+}
+
+/* ============ router ============ */
+function go(h){if(h==='#')h='';if(location.hash.replace(/^#/,'')===h.replace(/^#/,''))render();else location.hash=h}
+function swap(h){if(h==='#')h='';const u=location.href.split('#')[0]+(h?(h[0]==='#'?h:'#'+h):'#');if(location.href===u)render();else location.replace(u)}
+S.stack=[location.hash];
+window.addEventListener('hashchange',()=>{const h=location.hash,st=S.stack;if(st.length>1&&st[st.length-2]===h)st.pop();else st.push(h);render()});
+const PARENT={setup:'#',machine:'#machines',tool:'#crib',more:'#'};
+function render(){
+  const h=location.hash.replace(/^#/,''),i=h.indexOf('-');
+  const v=i<0?h:h.slice(0,i),id=i<0?'':h.slice(i+1);
+  S.route={v,id};
+  if(v==='edit'&&!S.draft){swap('#');return}
+  let html;
+  switch(v){
+    case 'setup':html=vSetup(id);break;
+    case 'edit':html=vWizard();break;
+    case 'machines':html=vMachines();break;
+    case 'machine':html=vMachine(id);break;
+    case 'crib':html=vCrib();break;
+    case 'tool':html=vTool(id);break;
+    case 'gaps':html=vGaps();break;
+    case 'more':html=vMore();break;
+    default:html=vLookup();
+  }
+  $('#view').innerHTML=html;
+  $('#app').classList.toggle('wizmode',v==='edit');
+  $('#nav').hidden=v==='edit';
+  const navV=v==='setup'?'':v==='machine'?'machines':v==='tool'?'crib':v;
+  $$('#nav [data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===navV));
+  if(S.lastHash!==location.hash){window.scrollTo(0,0);S.lastHash=location.hash}
+  hydrate($('#view'));
+}
+function rerender(){const y=window.scrollY;render();window.scrollTo(0,y)}
+
+/* ============ views: lookup ============ */
+function search(q,mf){
+  const nq=normPN(q),lq=q.trim().toLowerCase();
+  const list=S.setups.filter(s=>!mf||s.machineId===mf);
+  if(!lq)return list.sort((a,b)=>b.updated-a.updated);
+  const out=[];
+  for(const s of list){
+    const pn=normPN(s.pn);let sc=0;
+    if(nq&&pn===nq)sc=100;else if(nq&&pn.startsWith(nq))sc=80;else if(nq&&pn.includes(nq))sc=60;
+    else{const m=machineById(s.machineId);
+      const hay=[s.op,s.material,s.upper.size,s.lower.size,m&&m.name,toolLabel(toolById(s.upper.toolId)),toolLabel(toolById(s.lower.toolId)),...s.extraTools.map(r=>r.value),...s.settings.map(r=>r.value)].join(' ').toLowerCase();
+      if(hay.includes(lq))sc=30}
+    if(sc)out.push([sc,s]);
+  }
+  return out.sort((a,b)=>b[0]-a[0]||b[1].updated-a[1].updated).map(x=>x[1]);
+}
+function resultsHTML(){
+  const q=S.q,res=search(q,S.mf);
+  let h='';
+  const nq=normPN(q),anyPN=nq&&S.setups.some(s=>normPN(s.pn).includes(nq));
+  if(q.trim()&&!anyPN&&nq.length>=3){
+    h+=`<div class="notin"><div><small class="muted">Not in the book</small><br><b>${esc(q.trim().toUpperCase())}</b></div><button class="btn go sm" data-act="newSetup" data-pn="${esc(q.trim().toUpperCase())}">Capture it</button></div>`;
+  }
+  h+=`<div class="reshead"><span>${q.trim()?res.length+' match'+(res.length===1?'':'es'):'Recently updated'}</span><span>${S.setups.length} setups</span></div>`;
+  h+=res.slice(0,80).map(setupRow).join('');
+  if(!res.length&&!q.trim())h+=`<p class="hint pad">${S.mf?'No setups on this machine yet.':'No setups yet. Tap <b>Capture</b> while she sets one up.'}</p>`;
+  return h;
+}
+function vLookup(){
+  if(!S.setups.length&&!S.machines.length){
+    return `<div class="empty">
+      <h2>Start the book</h2>
+      <p class="hint">Every setup, every size, written down while the person who knows is still here.</p>
+      <ol><li>Add the machines.</li><li>Stand with her while she sets up. Tap <b>Capture</b>: part number, tool sizes, PSI, photos, her voice.</li><li>She checks it and it gets her stamp.</li><li>Paste the part list into <b>Gaps</b> to see what's still missing.</li></ol>
+      <label class="fl">Your name<input data-set="me" value="${esc(S.settings.me)}" placeholder="Who's writing it down"></label>
+      <label class="fl">The expert<input data-set="expert" value="${esc(S.settings.expert)}" placeholder="The one with all the knowledge"></label>
+      <div class="btns" style="margin:16px 0 0"><button class="btn go" data-act="machineForm">+ Add first machine</button><button class="btn ghost" data-act="demoLoad">Load demo data</button></div>
+    </div>`;
+  }
+  const backupOld=S.setups.filter(s=>!s.demo).length>=3&&now()-(S.settings.lastBackup||0)>7*86400000;
+  return `${backupOld?`<div id="banner2"><div class="bn bad" style="margin:10px 14px 0;display:flex;gap:10px;padding:10px 12px;border-radius:10px;font-size:14px"><p style="flex:1">The book only lives on this phone. Last backup: <b>${ago(S.settings.lastBackup)}</b>.</p><button class="btn sm go" data-act="backup">Back up</button></div></div>`:''}
+  <div class="searchwrap"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.2"/><path d="M15.2 15.2l5.3 5.3"/></svg>
+  <input id="q" type="search" inputmode="search" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Part number…" value="${esc(S.q)}">
+  ${S.q?'<button class="clr" data-act="clearQ" aria-label="Clear">✕</button>':''}</div>
+  ${S.machines.length>1?`<div class="chips scroll"><button class="chip ${!S.mf?'on':''}" data-act="mfilter" data-id="">All machines</button>${S.machines.map(m=>`<button class="chip ${S.mf===m.id?'on':''}" data-act="mfilter" data-id="${m.id}">${esc(m.name)}</button>`).join('')}</div>`:''}
+  <div id="results">${resultsHTML()}</div>`;
+}
+
+/* ============ views: setup detail ============ */
+function kvTable(rows){rows=(rows||[]).filter(r=>String(r.label).trim()||String(r.value).trim());if(!rows.length)return '';return `<div class="kvt">${rows.map(r=>`<div><span>${esc(r.label||'—')}</span><b>${esc(r.value||'—')}</b></div>`).join('')}</div>`}
+function vSetup(id){
+  const s=setupById(id);if(!s)return backBar('Not found')+`<p class="hint pad">That setup isn't in the book.</p>`;
+  const m=machineById(s.machineId),st=stampState(s),gaps=setupGaps(s);
+  const tu=toolById(s.upper.toolId),tl=toolById(s.lower.toolId);
+  const steps=s.steps.filter(x=>x.trim());
+  return `${backBar(m?m.name:'Setup')}
+  <section class="shead">
+    <div class="pnxl">${esc(s.pn)}</div>
+    <div class="sub">${s.rev?`<span class="rev">REV ${esc(s.rev)}</span>`:''}<span>${esc(s.op||'')}</span></div>
+    <div class="sub2">${m?`<a href="#machine-${m.id}">${esc(m.name)}</a>`:'<span class="warn">No machine set</span>'}${s.material||s.thk?' · '+esc([s.material,s.thk?s.thk+'″':''].filter(Boolean).join(' ')):''}</div>
+    <div class="stampslot">${s.verified?stampSVG(s.verified,st==='stale'):''}</div>
+  </section>
+  <section class="dro">${ro('UPPER',s.upper.size,tu?'lk':'')}${ro('LOWER',s.lower.size,tl?'lk':'')}${showsPsi(s)?ro('PSI',s.psi):''}</section>
+  ${tu||tl?`<div class="toolref">${[tu,tl].filter(Boolean).map(t=>`<a href="#tool-${t.id}">◆ ${esc(toolLabel(t))}${t.loc?' — '+esc(t.loc):''}</a>`).join('')}</div>`:''}
+  ${kvTable(s.extraTools)?`<div class="sec">Other tooling</div>${kvTable(s.extraTools)}`:''}
+  ${kvTable(s.settings)?`<div class="sec">Settings</div>${kvTable(s.settings)}`:''}
+  ${steps.length?`<div class="sec">Steps</div><ol class="steps">${steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}
+  ${String(s.watch||'').trim()?`<div class="haz"><h4>Watch out</h4><p>${esc(s.watch)}</p></div>`:''}
+  ${s.audio.length?`<div class="sec">Her voice notes</div><div class="auds">${audioList(s.audio)}</div>`:''}
+  ${s.photos.length?`<div class="sec">Photos <span class="cnt">${s.photos.length}</span></div><div class="ph-grid">${s.photos.map(p=>`<figure class="ph"><div class="ph-img" data-blob="${p.id}" data-act="viewPhoto" data-id="${p.id}" data-cap="${esc(p.cap)}"></div><figcaption>${esc(p.cap)}</figcaption></figure>`).join('')}</div>`:''}
+  ${st!=='ok'?`<div class="verify"><p>${st==='stale'?'This setup was changed after it was stamped. Have her look it over again.':'Has the expert checked this sheet against how she actually runs it?'}</p><button class="btn go wide" data-act="stampSetup" data-id="${s.id}">Stamp as verified</button></div>`:''}
+  ${gaps.length?`<div class="gaprow">${gaps.map(g=>`<span class="gap">${esc(g)}</span>`).join('')}</div>`:''}
+  <div class="btns"><button class="btn go" data-act="editSetup" data-id="${s.id}">Edit</button><button class="btn" data-act="dupSetup" data-id="${s.id}">Copy to new part</button><button class="btn" data-act="printSetup" data-id="${s.id}">Print sheet</button><button class="btn danger" data-act="delSetup" data-id="${s.id}">Delete</button></div>
+  <div class="meta">Written by ${esc(s.by||'—')} · created ${fmtDate(s.created)} · updated ${ago(s.updated)}${s.verified?`<br>Stamped by ${esc(s.verified.by)} on ${fmtDate(s.verified.at)}`:''}</div>`;
+}
+
+/* ============ views: wizard ============ */
+function vWizard(){
+  const d=S.draft,s=d.data,n=d.step;
+  const body=[wPart,wMachine,wTooling,wSettings,wHow,wPhotos,wReview][n](s);
+  return `<div class="wiz">
+    <div class="wiz-top"><button class="icon" data-act="wizCancel" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button><div class="wiz-title">${d.isNew?'New setup':'Edit '+esc(s.pn)}</div><span class="wiz-n">${n+1}/${STEPS.length}</span></div>
+    <div class="strip">${STEPS.map((t,i)=>`<button class="st ${i===n?'on':''} ${i<n?'done':''}" data-act="wizGo" data-i="${i}">${t}</button>`).join('')}</div>
+    <div class="wiz-body">${body}</div>
+    <div class="wiz-bar"><button class="btn ghost" data-act="wizPrev" ${n===0?'disabled':''}>Back</button>${n<STEPS.length-1?`<button class="btn go" data-act="wizNext">Next: ${STEPS[n+1]}</button>`:`<button class="btn go" data-act="wizSave">Save to book</button>`}</div>
+  </div>`;
+}
+function dupWarn(s){
+  if(!S.draft||!s.pn.trim())return '';
+  const ex=S.setups.filter(x=>x.id!==s.id&&normPN(x.pn)===normPN(s.pn));
+  if(!ex.length)return '';
+  return `<div class="dup">Already in the book: ${ex.map(x=>`<b>${esc(x.op||'setup')}</b> on ${esc((machineById(x.machineId)||{}).name||'no machine')}`).join(', ')}. Keep going if this is a different operation.</div>`;
+}
+function wPart(s){
+  return `<h2>The part</h2>
+  <label class="fl">Part number<input class="mono big up" data-bind="pn" value="${esc(s.pn)}" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="e.g. 4471203-05"></label>
+  <div id="dupWarn">${dupWarn(s)}</div>
+  <div class="row2"><label class="fl">Rev<input class="mono up" data-bind="rev" value="${esc(s.rev)}" autocapitalize="characters" placeholder="—"></label><label class="fl">Thickness (in)<input class="mono" data-bind="thk" value="${esc(s.thk)}" inputmode="decimal" placeholder=".040"></label></div>
+  <label class="fl">Operation<input data-bind="op" value="${esc(s.op)}" placeholder="What happens on this machine"></label>
+  <div class="chips">${OPS.map(o=>`<button class="chip" data-act="fill" data-k="op" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div>
+  <label class="fl">Material<input data-bind="material" value="${esc(s.material)}" placeholder="Alloy / temper"></label>
+  <div class="chips">${MATS.map(o=>`<button class="chip" data-act="fill" data-k="material" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div>`;
+}
+function wMachine(s){
+  return `<h2>Which machine?</h2><p class="hint">Tap the one this part runs on.</p>
+  <div class="tiles">${S.machines.map(m=>`<button class="tile ${s.machineId===m.id?'on':''}" data-act="pickMachine" data-id="${m.id}"><div class="tile-ph" ${m.photo?`data-blob="${m.photo}"`:''}>${m.photo?'':ICON_C}</div><b>${esc(m.name)}</b><small>${esc(m.type||'')}</small></button>`).join('')}
+  <button class="tile add" data-act="machineForm" data-ctx="wiz">+ New machine</button></div>`;
+}
+function toolChoices(s,key){
+  const pref=key==='upper'?['Upper','Punch','Rivet set']:['Lower','Die','Anvil','Rivet set'];
+  return S.tools.slice().sort((a,b)=>{
+    const sa=(a.machineId===s.machineId?2:0)+(pref.includes(a.kind)?1:0),sb=(b.machineId===s.machineId?2:0)+(pref.includes(b.kind)?1:0);
+    return sb-sa||toolLabel(a).localeCompare(toolLabel(b));
+  }).slice(0,16);
+}
+function toolSlot(s,key,label){
+  const slot=s[key],t=toolById(slot.toolId),ch=toolChoices(s,key);
+  return `<div class="slot"><div class="slot-h">${label}</div>
+  <input class="mono big" data-bind="${key}.size" value="${esc(slot.size)}" placeholder="Size or tool ID" autocomplete="off" spellcheck="false">
+  ${t?`<div class="linked">◆ Crib tag <b class="mono">${esc(toolLabel(t))}</b>${t.loc?' · '+esc(t.loc):''}<button class="x" data-act="unlinkTool" data-k="${key}">unlink</button></div>`:''}
+  ${ch.length?`<div class="chips">${ch.map(c=>`<button class="chip mono ${slot.toolId===c.id?'on':''}" data-act="pickTool" data-k="${key}" data-id="${c.id}">${esc(toolLabel(c))}${c.size&&c.code&&c.code!==c.size?`<small>${esc(c.size)}</small>`:''}</button>`).join('')}</div>`:''}
+  ${!t?`<button class="link" data-act="toolFromSlot" data-k="${key}">+ Add this tool to the crib (with where it's kept)</button>`:''}</div>`;
+}
+function rowsEd(arr,path,quick){
+  return `<div>${arr.map((r,i)=>`<div class="kv"><input data-bind="${path}.${i}.label" value="${esc(r.label)}" placeholder="What"><input class="mono" data-bind="${path}.${i}.value" value="${esc(r.value)}" placeholder="Setting"><button class="x" data-act="rowDel" data-p="${path}" data-i="${i}" aria-label="Remove">✕</button></div>`).join('')}</div>
+  <div class="chips">${quick.map(q=>`<button class="chip" data-act="rowAdd" data-p="${path}" data-l="${esc(q)}">+ ${esc(q)}</button>`).join('')}<button class="chip" data-act="rowAdd" data-p="${path}" data-l="">+ Other</button></div>`;
+}
+function wTooling(s){
+  return `<h2>Tooling</h2><p class="hint">Which size goes in, top and bottom. Link it to a crib tag so everyone knows where it lives.</p>
+  ${toolSlot(s,'upper','Upper tool')}${toolSlot(s,'lower','Lower tool')}
+  <div class="slot"><div class="slot-h">Anything else in the setup</div>${rowsEd(s.extraTools,'extraTools',EXTRA_Q)}</div>`;
+}
+function wSettings(s){
+  const m=machineById(s.machineId),air=(m?m.usesAir!==false:true)||S.draft.showPsi||String(s.psi||'').trim();
+  return `<h2>Settings</h2>
+  ${air?`<div class="slot"><div class="slot-h">Air pressure</div><div class="psi"><button class="btn" data-act="psiStep" data-d="-5">−5</button><input class="mono huge" data-bind="psi" inputmode="decimal" value="${esc(s.psi)}" placeholder="—"><span class="unit">PSI</span><button class="btn" data-act="psiStep" data-d="5">+5</button></div></div>`
+  :`<p class="hint">${esc(m.name)} isn't set up as an air machine. <button class="link" data-act="showPsi">Add PSI anyway</button></p>`}
+  <div class="slot"><div class="slot-h">Stops, depths, counts</div>${rowsEd(s.settings,'settings',SET_Q)}</div>`;
+}
+function wHow(s){
+  return `<h2>How she does it</h2>
+  <div class="slot-h" style="margin-top:14px">Steps, in order</div>
+  <ol class="steps-ed">${s.steps.map((t,i)=>`<li><textarea rows="2" data-bind="steps.${i}" placeholder="Step ${i+1}">${esc(t)}</textarea><div class="mv"><button class="x" data-act="stepMv" data-i="${i}" data-d="-1" aria-label="Move up">↑</button><button class="x" data-act="stepMv" data-i="${i}" data-d="1" aria-label="Move down">↓</button><button class="x" data-act="stepDel" data-i="${i}" aria-label="Remove">✕</button></div></li>`).join('')}</ol>
+  <button class="btn ghost wide" data-act="stepAdd">+ Add step</button>
+  <div class="slot-h hz">Watch-outs</div>
+  <textarea data-bind="watch" rows="4" placeholder="What goes wrong. What she checks. The thing nobody would guess.">${esc(s.watch)}</textarea>
+  <div class="slot-h" style="margin-top:20px">Voice notes</div>
+  <p class="hint">Hit record and let her talk through it while she sets up. Her words, kept.</p>
+  ${audioList(s.audio,'draft')}
+  <div class="recrow"><button class="btn rec" data-act="recDraft">● Record</button><label class="btn ghost">Attach audio<input type="file" accept="audio/*" hidden data-file="draftAudio"></label></div>`;
+}
+function wPhotos(s){
+  return `<h2>Photos</h2><p class="hint">Overall setup, each tool up close, a part loaded, and a good part.</p>
+  <div class="phadd"><label class="btn go">Take photo<input type="file" accept="image/*" capture="environment" hidden data-file="draftPhoto"></label><label class="btn ghost">From gallery<input type="file" accept="image/*" multiple hidden data-file="draftPhoto"></label></div>
+  <div class="ph-grid" style="margin:14px 0 0">${s.photos.map((p,i)=>`<div class="ph"><div class="ph-img" data-blob="${p.id}" data-act="viewPhoto" data-id="${p.id}" data-cap="${esc(p.cap)}"></div><select data-bind="photos.${i}.cap">${CAPS.map(c=>`<option ${p.cap===c?'selected':''}>${esc(c)}</option>`).join('')}</select><button class="x" data-act="photoDel" data-i="${i}" aria-label="Remove photo">✕</button></div>`).join('')}</div>`;
+}
+function wReview(s){
+  const d=S.draft,gaps=setupGaps(s,d.stampNow),m=machineById(s.machineId);
+  return `<h2>Check it over</h2>
+  <div class="review"><div class="pn">${esc((s.pn||'NO PART NUMBER').toUpperCase())}</div><div class="muted">${esc(s.op||'')}${s.op?' · ':''}${esc(m?m.name:'No machine')}</div>
+  <div class="dro">${ro('UPPER',s.upper.size)}${ro('LOWER',s.lower.size)}${showsPsi(s)?ro('PSI',s.psi):''}</div></div>
+  ${gaps.length?`<div>${gaps.map(g=>`<span class="gap">${esc(g)}</span>`).join('')}</div><p class="hint">You can save now and fill these in later.</p>`:'<div class="okline" style="margin:8px 0">Complete sheet</div>'}
+  <label class="fl">Written down by<input data-bind="by" value="${esc(s.by)}" placeholder="Your name"></label>
+  ${!S.settings.expert?`<label class="fl">Expert's name<input data-set="expert" value="" placeholder="The one with the knowledge"></label>`:''}
+  <label class="check"><input type="checkbox" data-check="stampNow" ${d.stampNow?'checked':''}><span>Stamp as verified by <b>${esc(S.settings.expert||'the expert')}</b>. She went over this sheet and it's how she runs it.</span></label>`;
+}
+
+/* ============ views: machines ============ */
+function qaDone(x){return !!(String(x.a||'').trim()||(x.audio||[]).length)}
+function vMachines(){
+  return `<div class="sec">Machines <span class="cnt">${S.machines.length}</span></div>
+  ${S.machines.map(m=>{const ss=setupsOn(m.id),v=ss.filter(s=>stampState(s)==='ok').length,qa=(m.qa||[]),qd=qa.filter(qaDone).length;
+    return `<a class="mrow" href="#machine-${m.id}"><div class="tile-ph" ${m.photo?`data-blob="${m.photo}"`:''}>${m.photo?'':ICON_C}</div><div><b>${esc(m.name)}</b><small>${esc(m.type||'')}${m.area?' · '+esc(m.area):''}</small><small>Know-how ${qd}/${qa.length} answered</small></div><div class="nums"><b>${ss.length}</b><br>setups<br>${v} stamped</div></a>`}).join('')}
+  <div class="btns"><button class="btn go" data-act="machineForm">+ Add machine</button></div>`;
+}
+function vMachine(id){
+  const m=machineById(id);if(!m)return backBar('Not found')+'<p class="hint pad">Machine not found.</p>';
+  const ss=setupsOn(m.id).sort((a,b)=>a.pn.localeCompare(b.pn)),qa=m.qa||[],ex=S.settings.expert||'the expert';
+  return `${backBar('Machines')}
+  <div class="mhero" ${m.photo?`data-blob="${m.photo}"`:''}>${m.photo?'':ICON_C}<label class="btn sm">${m.photo?'Change photo':'Add photo'}<input type="file" accept="image/*" hidden data-file="machinePhoto" data-id="${m.id}"></label></div>
+  <div class="mtitle"><h2>${esc(m.name)}</h2><p>${esc(m.type||'')}${m.area?' · '+esc(m.area):''}</p>
+  ${m.usesAir!==false?'<span class="badge">Shop air · PSI tracked</span>':''}<span class="badge">${ss.length} setups</span></div>
+  ${m.notes?`<p class="pad" style="margin-top:10px;white-space:pre-wrap">${esc(m.notes)}</p>`:''}
+  <div class="btns"><button class="btn go" data-act="newSetup" data-mid="${m.id}">+ Capture setup here</button><button class="btn" data-act="machineForm" data-id="${m.id}">Edit machine</button></div>
+  <div class="sec">Ask ${esc(ex)} <span class="cnt">${qa.filter(qaDone).length}/${qa.length}</span></div>
+  <p class="hint pad">The stuff that isn't tied to one part number. Type her answer or record her saying it.</p>
+  ${qa.map((x,i)=>`<div class="qa ${qaDone(x)?'done':''}"><div class="q">${esc(x.q)}</div><textarea rows="3" data-qa="${i}" data-mid="${m.id}" placeholder="Her answer…">${esc(x.a)}</textarea>${audioList(x.audio,'qa',`data-mid="${m.id}" data-qi="${i}"`)}<div class="recrow"><button class="btn rec sm" data-act="recQA" data-mid="${m.id}" data-qi="${i}">● Record</button><label class="btn ghost sm">Attach audio<input type="file" accept="audio/*" hidden data-file="qaAudio" data-mid="${m.id}" data-qi="${i}"></label></div></div>`).join('')}
+  <div class="qaadd"><input id="qaNew" placeholder="Add your own question…"><button class="btn sm" data-act="qaAdd" data-mid="${m.id}">Add</button></div>
+  <div class="sec">Setups on this machine <span class="cnt">${ss.length}</span></div>
+  ${ss.map(setupRow).join('')||'<p class="hint pad">None yet.</p>'}
+  <div class="btns"><button class="btn danger" data-act="delMachine" data-id="${m.id}">Delete machine</button></div>`;
+}
+function machineForm(m,ctx){
+  m=m||{};
+  openModal(`<h3>${m.id?'Edit machine':'New machine'}</h3>
+  <label class="fl">Name<input data-mf="name" value="${esc(m.name||'')}" placeholder="e.g. Blue C-frame #1"></label>
+  <label class="fl">Type<input data-mf="type" list="mtypes" value="${esc(m.type||'')}" placeholder="Pneumatic press, arbor press…"></label>
+  <datalist id="mtypes">${MTYPES.map(t=>`<option value="${esc(t)}">`).join('')}</datalist>
+  <label class="fl">Where it is<input data-mf="area" value="${esc(m.area||'')}" placeholder="Bay, cell, next to…"></label>
+  <label class="check"><input type="checkbox" data-mf="usesAir" ${m.usesAir!==false?'checked':''}><span>Runs on shop air (track PSI)</span></label>
+  <label class="fl">Notes<textarea data-mf="notes" rows="3" placeholder="Quirks, maintenance, who to call">${esc(m.notes||'')}</textarea></label>
+  <div class="mbar"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn go" data-act="machineSave" data-id="${m.id||''}" data-ctx="${ctx||''}">Save</button></div>`);
+}
+
+/* ============ views: crib ============ */
+function tagHTML(t){const n=toolUses(t.id).length;return `<a class="tag" href="#tool-${t.id}"><span class="use">${n}×</span><div class="code">${esc(t.code||t.size||'—')}</div>${t.size&&t.code?`<div class="sz">${esc(t.size)}</div>`:''}<div class="nm">${esc(t.name||t.kind||'')}</div>${t.loc?`<div class="loc">${esc(t.loc)}</div>`:''}</a>`}
+function vCrib(){
+  const q=(S.cq||'').toLowerCase();
+  const list=S.tools.filter(t=>!q||[t.code,t.size,t.name,t.kind,t.loc].join(' ').toLowerCase().includes(q)).sort((a,b)=>toolLabel(a).localeCompare(toolLabel(b)));
+  return `<div class="sec">Tool crib <span class="cnt">${S.tools.length}</span></div>
+  <p class="hint pad">Every punch, die, anvil and shim, with where it lives and which parts use it.</p>
+  ${S.tools.length>6?`<div class="pad" style="margin-top:8px"><input id="cq" placeholder="Filter tools…" value="${esc(S.cq||'')}"></div>`:''}
+  <div class="tags" id="tagList">${list.map(tagHTML).join('')}</div>
+  <div class="btns"><button class="btn go" data-act="toolForm">+ Add tool</button></div>`;
+}
+function vTool(id){
+  const t=toolById(id);if(!t)return backBar('Not found')+'<p class="hint pad">Tool not found.</p>';
+  const uses=toolUses(t.id),m=machineById(t.machineId);
+  return `${backBar('Crib')}
+  <div class="tag big"><div class="code">${esc(t.code||t.size||'—')}</div>${t.size&&t.code?`<div class="sz">Size ${esc(t.size)}</div>`:''}<div class="nm">${esc(t.name||'')}${t.kind?' · '+esc(t.kind):''}</div>${t.loc?`<div class="loc">Kept: ${esc(t.loc)}</div>`:''}${m?`<div class="loc">Lives with: ${esc(m.name)}</div>`:''}</div>
+  <div class="tagph" ${t.photo?`data-blob="${t.photo}"`:''}>${t.photo?'':'No photo yet'}</div>
+  <div class="btns"><label class="btn">${t.photo?'Change photo':'Add photo'}<input type="file" accept="image/*" hidden data-file="toolPhoto" data-id="${t.id}"></label><button class="btn go" data-act="toolForm" data-id="${t.id}">Edit</button></div>
+  ${t.notes?`<p class="pad" style="white-space:pre-wrap">${esc(t.notes)}</p>`:''}
+  <div class="sec">Used on <span class="cnt">${uses.length}</span></div>
+  ${uses.map(setupRow).join('')||'<p class="hint pad">Not linked to any setup yet.</p>'}
+  <div class="btns"><button class="btn danger" data-act="delTool" data-id="${t.id}">Delete tool</button></div>`;
+}
+function toolForm(t,ctx){
+  t=t||{};
+  openModal(`<h3>${t.id?'Edit tool':'New crib tag'}</h3>
+  <div class="row2"><label class="fl">Tag / ID<input class="mono up" data-tf="code" value="${esc(t.code||'')}" placeholder="U-3/16"></label><label class="fl">Size<input class="mono" data-tf="size" value="${esc(t.size||'')}" placeholder="3/16"></label></div>
+  <label class="fl">What it is<input data-tf="name" value="${esc(t.name||'')}" placeholder="Dimple punch 100°, flat anvil…"></label>
+  <div class="row2"><label class="fl">Kind<select data-tf="kind">${TKINDS.map(k=>`<option ${t.kind===k?'selected':''}>${esc(k)}</option>`).join('')}</select></label>
+  <label class="fl">Lives with<select data-tf="machineId"><option value="">Any machine</option>${S.machines.map(m=>`<option value="${m.id}" ${t.machineId===m.id?'selected':''}>${esc(m.name)}</option>`).join('')}</select></label></div>
+  <label class="fl">Where it's kept<input data-tf="loc" value="${esc(t.loc||'')}" placeholder="Drawer 2, left · on the machine · tool cart"></label>
+  <label class="fl">Notes<textarea data-tf="notes" rows="2" placeholder="Wear, regrinds, matching die…">${esc(t.notes||'')}</textarea></label>
+  <div class="mbar"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn go" data-act="toolSave" data-id="${t.id||''}" data-ctx="${ctx||''}">Save</button></div>`);
+}
+
+/* ============ views: gaps ============ */
+function vGaps(){
+  const real=S.setups,ok=real.filter(s=>stampState(s)==='ok').length,pct=real.length?Math.round(ok/real.length*100):0;
+  const have=new Set(S.setups.map(s=>normPN(s.pn)));
+  const missing=S.targets.filter(t=>!have.has(normPN(t))),covered=S.targets.length-missing.length;
+  const gappy=S.setups.map(s=>[s,setupGaps(s)]).filter(x=>x[1].length).sort((a,b)=>b[1].length-a[1].length);
+  const mq=S.machines.map(m=>[m,(m.qa||[]).filter(x=>!qaDone(x)).length]).filter(x=>x[1]);
+  const ex=S.settings.expert||'the expert';
+  return `<div class="meter"><div class="big">${ok}<small> / ${real.length} stamped</small></div><p>Setups ${esc(ex)} has checked and signed off.</p><div class="bar"><i style="width:${pct}%"></i></div></div>
+  ${S.targets.length?`<div class="meter"><div class="big">${covered}<small> / ${S.targets.length} parts covered</small></div><p>From the part list you pasted.</p><div class="bar"><i style="width:${Math.round(covered/S.targets.length*100)}%"></i></div></div>`:''}
+  <div class="sec">Not in the book yet <span class="cnt">${missing.length}</span></div>
+  ${S.targets.length?`<div class="pnchips">${missing.map(p=>`<span class="pnchip">${esc(p)}<button data-act="newSetup" data-pn="${esc(p)}">Capture</button></span>`).join('')||'<p class="hint">Every part on the list has a setup.</p>'}</div>`:'<p class="hint pad">Paste every part number that runs on these machines (from the router, ERP, or a spreadsheet column). The ones with no setup show up here.</p>'}
+  <div class="btns"><button class="btn" data-act="pasteTargets">${S.targets.length?'Edit part list':'Paste part list'}</button></div>
+  <div class="sec">Setups with holes <span class="cnt">${gappy.length}</span></div>
+  ${gappy.map(([s,g])=>`<a class="srow ${stampState(s)}" href="#setup-${s.id}"><div class="srow-h"><span class="pn">${esc(s.pn)}</span><span class="muted small">${esc((machineById(s.machineId)||{}).name||'')}</span></div><div style="margin-top:6px">${g.map(x=>`<span class="gap">${esc(x)}</span>`).join('')}</div></a>`).join('')||'<p class="hint pad">None. Every sheet is complete.</p>'}
+  <div class="sec">Questions still to ask <span class="cnt">${mq.reduce((a,x)=>a+x[1],0)}</span></div>
+  ${mq.map(([m,n])=>`<a class="mq" href="#machine-${m.id}"><span>${esc(m.name)}</span><b>${n} open</b></a>`).join('')||'<p class="hint pad">All machine questions answered.</p>'}`;
+}
+
+/* ============ views: more ============ */
+function vMore(){
+  const demo=[...S.setups,...S.machines,...S.tools].some(x=>x.demo);
+  return `${backBar('Backup & settings')}
+  <div class="sec">Names</div>
+  <div class="setrow">
+  <label class="fl">Shop / department<input data-set="shop" value="${esc(S.settings.shop)}" placeholder="Shows in the header and on printed sheets"></label>
+  <label class="fl">Your name<input data-set="me" value="${esc(S.settings.me)}"></label>
+  <label class="fl">The expert<input data-set="expert" value="${esc(S.settings.expert)}" placeholder="Her name goes on the verified stamp"></label></div>
+  <div class="sec">Backup</div>
+  <p class="hint pad">The book lives on this device. Back it up to your work email or drive, and import the file on another phone to copy the whole book over (photos and voice notes included). Last backup: <b>${ago(S.settings.lastBackup)}</b>.</p>
+  <div class="btns"><button class="btn go" data-act="backup">Back up / restore</button></div>
+  <div class="sec">Print</div>
+  <p class="hint pad">One sheet per setup, sorted by machine. Laminate them and hang them at the machine.</p>
+  <div class="btns"><button class="btn" data-act="printAll">Print all ${S.setups.length} sheets</button></div>
+  <div class="sec">Demo</div>
+  <div class="btns">${demo?'<button class="btn" data-act="demoClear">Remove demo data</button>':'<button class="btn" data-act="demoLoad">Load demo data</button>'}</div>
+  <div class="sec">Danger</div>
+  <div class="btns"><button class="btn danger" data-act="wipe">Erase everything on this device</button></div>
+  <p class="meta">BLACKBOOK v1 · storage: ${Store.mode==='idb'?'on-device (IndexedDB)':'<span class="warn">blocked, nothing saves</span>'} · ${S.setups.length} setups, ${S.machines.length} machines, ${S.tools.length} tools</p>`;
+}
+
+/* ============ recording ============ */
+const Rec={rec:null,stream:null,chunks:[],t0:0,timer:null,cancel:false};
+async function startRec(onDone){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.MediaRecorder){toast('Recording not supported here. Use "Attach audio".',3200);return}
+  try{Rec.stream=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){toast('Mic is blocked here. Use "Attach audio" instead.',3200);return}
+  const types=['audio/webm;codecs=opus','audio/mp4','audio/webm','audio/ogg;codecs=opus'];
+  const mt=types.find(t=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(t));
+  try{Rec.rec=new MediaRecorder(Rec.stream,mt?{mimeType:mt,audioBitsPerSecond:32000}:undefined)}catch(e){Rec.rec=new MediaRecorder(Rec.stream)}
+  Rec.chunks=[];Rec.cancel=false;
+  Rec.rec.ondataavailable=e=>{if(e.data&&e.data.size)Rec.chunks.push(e.data)};
+  Rec.rec.onstop=async()=>{
+    clearInterval(Rec.timer);Rec.stream.getTracks().forEach(t=>t.stop());
+    modalLock=false;closeModal();
+    if(Rec.cancel||!Rec.chunks.length)return;
+    const blob=new Blob(Rec.chunks,{type:(Rec.rec.mimeType||'audio/webm').split(';')[0]});
+    const id=await saveBlob(blob);onDone({id,dur:(now()-Rec.t0)/1000});
+  };
+  Rec.t0=now();Rec.rec.start(1000);
+  openModal(`<div class="recbox"><h3><span class="recdot"></span>Recording</h3><div class="rectime" id="recT">0:00</div><div class="mbar"><button class="btn ghost" data-act="recCancel">Cancel</button><button class="btn go" data-act="recStop">Stop &amp; keep</button></div></div>`);
+  modalLock=true;
+  Rec.timer=setInterval(()=>{const el=$('#recT');if(el)el.textContent=fmtDur((now()-Rec.t0)/1000)},500);
+}
+async function audioFromFile(file){const id=await saveBlob(file);const dur=await new Promise(r=>{const a=new Audio();a.preload='metadata';a.onloadedmetadata=()=>r(isFinite(a.duration)?a.duration:0);a.onerror=()=>r(0);a.src=urlCache.get(id)});return{id,dur}}
+
+/* ============ draft actions ============ */
+function newDraft(pn='',mid=''){
+  S.draft={isNew:true,step:0,stampNow:false,showPsi:false,orig:'',added:[],removed:[],data:blankSetup(pn)};
+  if(mid)S.draft.data.machineId=mid;else if(S.machines.length===1)S.draft.data.machineId=S.machines[0].id;
+  saveDraft();go('#edit');
+}
+async function pendingDraft(){
+  if(!S.draft)return true;
+  const d=S.draft;
+  if(d.data.pn||d.data.photos.length||d.data.audio.length||!d.isNew){
+    const v=await choose(`There's an unsaved setup in progress${d.data.pn?' for <b class="mono">'+esc(d.data.pn)+'</b>':''}.`,[{label:'Resume it',val:'resume',cls:'go'},{label:'Throw it away',val:'toss',cls:'danger'},{label:'Cancel',val:null,cls:'ghost'}]);
+    if(v==='resume'){go('#edit');return false}
+    if(v!=='toss')return false;
+  }
+  await discardDraft();return true;
+}
+async function discardDraft(){const d=S.draft;if(!d)return;for(const b of d.added||[])await delBlob(b);S.draft=null;await Store.del('meta','draft')}
+async function wizSave(){
+  const d=S.draft,s=d.data;
+  s.pn=String(s.pn||'').trim().toUpperCase();s.rev=String(s.rev||'').trim().toUpperCase();
+  if(!s.pn){d.step=0;render();toast('Part number first');return}
+  s.steps=s.steps.map(x=>String(x)).filter(x=>x.trim());
+  s.extraTools=s.extraTools.filter(r=>String(r.label).trim()||String(r.value).trim());
+  s.settings=s.settings.filter(r=>String(r.label).trim()||String(r.value).trim());
+  const changed=d.isNew||snapshot(s)!==d.orig;
+  if(changed)s.updated=now();
+  if(d.isNew)s.created=s.updated;
+  if(d.stampNow){const by=S.settings.expert||'Expert';s.verified={by,init:initials(by),at:s.updated}}
+  await Store.put('setups',s);upsert(S.setups,s);
+  for(const b of d.removed||[])await delBlob(b);
+  S.draft=null;clearTimeout(timers.draft);await Store.del('meta','draft');
+  S.lastHash=null;swap('#setup-'+s.id);
+  toast(d.isNew?'Saved to the book':'Setup updated');
+}
+
+/* ============ demo ============ */
+async function loadDemo(){
+  const t=now();
+  const m1={id:uid('m'),name:'DEMO C-frame',type:'Pneumatic C-frame press',area:'Sheet metal, by the arbor press',usesAir:true,notes:'Regulator is under the lower arm. Upper tool block held by two nuts.',photo:'',qa:seedQA(true),demo:true,created:t,updated:t};
+  m1.qa[0].a='Air at the regulator first, then cycle it once with nothing in it. Make sure upper and lower line up before a part goes in.';
+  const m2={id:uid('m'),name:'DEMO arbor press',type:'Arbor press',area:'Back wall',usesAir:false,notes:'',photo:'',qa:seedQA(false),demo:true,created:t,updated:t};
+  const T=(code,name,kind,size,loc,mid)=>({id:uid('t'),code,name,kind,size,loc,machineId:mid,notes:'',photo:'',demo:true,created:t,updated:t});
+  const t1=T('U-3/16','Dimple punch 100°','Upper','3/16','Drawer 2, left',m1.id),t2=T('L-WEDGE','Wedge anvil, flat','Lower','Flat wedge','On the machine',m1.id),
+        t3=T('U-5/32','Dimple punch 100°','Upper','5/32','Drawer 2, left',m1.id),t4=T('L-5/32','Dimple die 100°','Lower','5/32','Drawer 2, right',m1.id);
+  const base=(o)=>({...blankSetup(),demo:true,by:'Demo',created:t,updated:t,...o});
+  const s1=base({pn:'DEMO-44712-05',rev:'C',op:'Dimple 6x Ø.191',material:'2024-T3',thk:'.040',machineId:m1.id,upper:{toolId:t1.id,size:'3/16'},lower:{toolId:t2.id,size:'Flat wedge'},psi:'80',
+    extraTools:[{label:'Shims',value:'.010 x2 under anvil'}],settings:[{label:'Hits per hole',value:'1'},{label:'Part orientation',value:'Flange up, tab toward you'}],
+    steps:['Set regulator to 80 and cycle once empty.','Load part flange up, tab toward you.','Hit each hole once. Check the first dimple with a rivet before running the rest.'],
+    watch:'If the pin on the anvil is loose the dimple walks off center. Re-tape it before every run.',verified:{by:'Demo Expert',init:'DE',at:t}});
+  const s2=base({pn:'DEMO-44712-07',rev:'A',op:'Dimple 4x Ø.159',material:'2024-T3',thk:'.032',machineId:m1.id,upper:{toolId:t3.id,size:'5/32'},lower:{toolId:t4.id,size:'5/32'},psi:'75',steps:['Same as -05 but 75 PSI. Thinner material.']});
+  const s3=base({pn:'DEMO-90331-01',op:'Press bushing',material:'321 SS',machineId:m2.id,upper:{toolId:'',size:'Ø.375 pusher'},lower:{toolId:'',size:'5/8 cup die'},steps:['Lube the bushing.','Press flush, no more.'],verified:{by:'Demo Expert',init:'DE',at:t-3*86400000}});
+  for(const m of [m1,m2]){await Store.put('machines',m);upsert(S.machines,m)}
+  for(const x of [t1,t2,t3,t4]){await Store.put('tools',x);upsert(S.tools,x)}
+  for(const x of [s1,s2,s3]){await Store.put('setups',x);upsert(S.setups,x)}
+  const add=['DEMO-44712-05','DEMO-44712-07','DEMO-44712-09','DEMO-51020-02','DEMO-90331-01'];
+  for(const p of add)if(!S.targets.some(x=>normPN(x)===normPN(p)))S.targets.push(p);
+  await saveTargets();
+}
+async function clearDemo(){
+  for(const k of ['setups','tools','machines'])for(const x of S[k].filter(x=>x.demo)){await Store.del(k,x.id)}
+  for(const k of ['setups','tools','machines'])S[k]=S[k].filter(x=>!x.demo);
+  S.targets=S.targets.filter(p=>!/^DEMO/i.test(p));await saveTargets();
+}
+
+/* ============ backup ============ */
+async function buildBackup(){
+  const blobs=[];for(const b of await Store.all('blobs'))blobs.push({id:b.id,type:b.type,data:await blobToB64(b.blob)});
+  return {app:'blackbook',v:1,exported:new Date().toISOString(),settings:{shop:S.settings.shop,me:S.settings.me,expert:S.settings.expert},targets:S.targets,machines:S.machines,tools:S.tools,setups:S.setups,blobs};
+}
+async function importData(o){
+  if(!o||o.app!=='blackbook')throw new Error('That is not a BLACKBOOK backup.');
+  let n=0;
+  for(const b of o.blobs||[])if(!(await Store.get('blobs',b.id)))await Store.put('blobs',{id:b.id,type:b.type,blob:b64ToBlob(b.data,b.type),created:now()});
+  for(const k of ['machines','tools','setups'])for(const r of o[k]||[]){const ex=S[k].find(x=>x.id===r.id);if(!ex||(r.updated||0)>(ex.updated||0)){await Store.put(k,r);upsert(S[k],r);n++}}
+  for(const p of o.targets||[])if(!S.targets.some(x=>normPN(x)===normPN(p)))S.targets.push(p);
+  await saveTargets();
+  for(const k of ['shop','me','expert'])if(!S.settings[k]&&o.settings&&o.settings[k])S.settings[k]=o.settings[k];
+  saveSettings();
+  return n;
+}
+function backupModal(){
+  openModal(`<h3>Back up the book</h3><p>Everything in one file: setups, machines, crib, photos, voice notes. Send it to your work email or drive.</p>
+  <button class="btn go wide" data-act="exportFile">Save / share backup file</button>
+  <button class="btn ghost wide" data-act="exportCopy">Copy backup as text</button>
+  <h3 style="margin-top:22px">Restore or merge</h3><p>Brings in anything newer from another phone's backup. Nothing here gets deleted.</p>
+  <label class="btn ghost wide">Import backup file<input type="file" accept=".json,.txt,application/json,text/plain" hidden data-file="import"></label>
+  <button class="btn ghost wide" data-act="importPaste">Paste backup text</button>
+  <div class="mbar"><button class="btn ghost" data-act="closeModal">Close</button></div>`);
+}
+
+/* ============ print ============ */
+function sheetHTML(s){
+  const m=machineById(s.machineId),st=stampState(s),steps=s.steps.filter(x=>x.trim());
+  const rows=(t,r)=>{r=(r||[]).filter(x=>String(x.label).trim()||String(x.value).trim());return r.length?`<div class="ph4">${t}</div><table class="ptab">${r.map(x=>`<tr><td>${esc(x.label)}</td><td>${esc(x.value)}</td></tr>`).join('')}</table>`:''};
+  const tu=toolById(s.upper.toolId),tl=toolById(s.lower.toolId);
+  return `<div class="psheet"><div class="ptop"><div><div class="ppn">${esc(s.pn)}${s.rev?` <span style="font-size:14pt">REV ${esc(s.rev)}</span>`:''}</div><div class="psub"><b>${esc(s.op||'')}</b> · ${esc(m?m.name:'No machine')}${s.material||s.thk?' · '+esc([s.material,s.thk?s.thk+'″':''].filter(Boolean).join(' ')):''}</div></div>
+  <div><div class="pbrand">SETUP SHEET${S.settings.shop?'<br>'+esc(S.settings.shop.toUpperCase()):''}</div><div class="pstamp">${s.verified?stampSVG(s.verified,st==='stale'):''}</div></div></div>
+  <div class="pro"><div><span>UPPER</span><b>${esc(s.upper.size||'—')}</b>${tu&&tu.loc?`<br><small>${esc(toolLabel(tu))} · ${esc(tu.loc)}</small>`:''}</div><div><span>LOWER</span><b>${esc(s.lower.size||'—')}</b>${tl&&tl.loc?`<br><small>${esc(toolLabel(tl))} · ${esc(tl.loc)}</small>`:''}</div>${showsPsi(s)?`<div><span>AIR PSI</span><b>${esc(s.psi||'—')}</b></div>`:''}</div>
+  ${rows('Other tooling',s.extraTools)}${rows('Settings',s.settings)}
+  ${steps.length?`<div class="ph4">Steps</div><ol class="psteps">${steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}
+  ${String(s.watch||'').trim()?`<div class="ph4">Watch out</div><div class="pwatch">${esc(s.watch)}</div>`:''}
+  ${s.photos.length?`<div class="ph4">Photos</div><div class="pphotos">${s.photos.slice(0,6).map(p=>`<figure><img data-blob="${p.id}" alt=""><figcaption>${esc(p.cap)}</figcaption></figure>`).join('')}</div>`:''}
+  <div class="pfoot">Written by ${esc(s.by||'—')} · updated ${fmtDate(s.updated)}${s.verified?` · verified by ${esc(s.verified.by)} ${fmtDate(s.verified.at)}${st==='stale'?' (CHANGED SINCE — RE-VERIFY)':''}`:' · NOT VERIFIED'} · printed ${fmtDate(now())} · BLACKBOOK</div></div>`;
+}
+async function printSheets(list){
+  if(!list.length){toast('Nothing to print');return}
+  const p=$('#print');p.innerHTML=list.map(sheetHTML).join('');
+  await hydrate(p);
+  await Promise.all($$('img',p).map(i=>i.complete?0:new Promise(r=>{i.onload=i.onerror=r})));
+  if(IN_FRAME)toast('Printing is blocked in this preview. It works once hosted.',3200);
+  try{window.print()}catch(e){}
+}
+
+/* ============ actions ============ */
+const A={
+  home:()=>{S.q='';go('#')},
+  nav:el=>go(el.dataset.to),
+  back:()=>{if(S.stack.length>1)history.back();else go(PARENT[S.route.v]||'#')},
+  dismissFrame:()=>{S.settings.hideFrameNote=true;saveSettings();banners()},
+  clearQ:()=>{S.q='';render();const q=$('#q');q&&q.focus()},
+  mfilter:el=>{S.mf=el.dataset.id;rerender()},
+  newSetup:async el=>{if(await pendingDraft())newDraft(el.dataset.pn||'',el.dataset.mid||'')},
+  wizGo:el=>{S.draft.step=+el.dataset.i;saveDraft();render();window.scrollTo(0,0)},
+  wizNext:()=>{const d=S.draft;if(d.step===0&&!String(d.data.pn).trim()){toast('Enter the part number');$('[data-bind="pn"]').focus();return}d.step=Math.min(STEPS.length-1,d.step+1);saveDraft();render();window.scrollTo(0,0)},
+  wizPrev:()=>{S.draft.step=Math.max(0,S.draft.step-1);saveDraft();render();window.scrollTo(0,0)},
+  wizSave:()=>wizSave(),
+  wizCancel:async()=>{
+    const d=S.draft,dirty=d.isNew?!!(d.data.pn||d.data.photos.length||d.data.audio.length||d.data.steps.length):snapshot(d.data)!==d.orig;
+    if(dirty&&!(await ask('Throw away what you entered?','Discard',true)))return;
+    const id=d.data.id,isNew=d.isNew;await discardDraft();swap(isNew?'#':'#setup-'+id);
+  },
+  fill:el=>{const k=el.dataset.k,v=el.dataset.v;setPath(S.draft.data,k,v);const i=$(`[data-bind="${k}"]`);if(i)i.value=v;saveDraft()},
+  pickMachine:el=>{S.draft.data.machineId=el.dataset.id;saveDraft();rerender();setTimeout(()=>{if(S.route.v==='edit'&&S.draft&&S.draft.step===1){S.draft.step=2;saveDraft();render();window.scrollTo(0,0)}},220)},
+  pickTool:el=>{const k=el.dataset.k,t=toolById(el.dataset.id),slot=S.draft.data[k];if(slot.toolId===t.id){slot.toolId=''}else{slot.toolId=t.id;slot.size=t.size||t.code||slot.size}saveDraft();rerender()},
+  unlinkTool:el=>{S.draft.data[el.dataset.k].toolId='';saveDraft();rerender()},
+  toolFromSlot:el=>{const k=el.dataset.k,s=S.draft.data;toolForm({size:s[k].size,kind:k==='upper'?'Upper':'Lower',machineId:s.machineId},'slot:'+k)},
+  rowAdd:el=>{const p=el.dataset.p,arr=S.draft.data[p];arr.push({label:el.dataset.l,value:''});saveDraft();rerender();const ins=$$(`[data-bind^="${p}.${arr.length-1}."]`);const f=el.dataset.l?ins[1]:ins[0];f&&f.focus()},
+  rowDel:el=>{S.draft.data[el.dataset.p].splice(+el.dataset.i,1);saveDraft();rerender()},
+  psiStep:el=>{const s=S.draft.data;let v=parseFloat(s.psi);if(isNaN(v))v=60;else v+=+el.dataset.d;v=Math.max(0,Math.round(v));s.psi=String(v);$('[data-bind="psi"]').value=s.psi;saveDraft()},
+  showPsi:()=>{S.draft.showPsi=true;rerender()},
+  stepAdd:()=>{S.draft.data.steps.push('');saveDraft();rerender();const t=$$('.steps-ed textarea');t.length&&t[t.length-1].focus()},
+  stepMv:el=>{const a=S.draft.data.steps,i=+el.dataset.i,j=i+ +el.dataset.d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];saveDraft();rerender()},
+  stepDel:el=>{S.draft.data.steps.splice(+el.dataset.i,1);saveDraft();rerender()},
+  recDraft:()=>startRec(({id,dur})=>{const d=S.draft;if(!d)return;d.data.audio.push({id,dur,label:'Voice note '+(d.data.audio.length+1)});d.added.push(id);saveDraft();rerender()}),
+  recQA:el=>{const m=machineById(el.dataset.mid),qi=+el.dataset.qi;startRec(({id,dur})=>{const x=m.qa[qi];x.audio=x.audio||[];x.audio.push({id,dur,label:'Answer '+(x.audio.length+1)});m.updated=now();Store.put('machines',m);rerender()})},
+  recStop:()=>{if(Rec.rec&&Rec.rec.state!=='inactive')Rec.rec.stop()},
+  recCancel:()=>{Rec.cancel=true;if(Rec.rec&&Rec.rec.state!=='inactive')Rec.rec.stop()},
+  audDel:async el=>{
+    if(!(await ask('Delete this voice note?','Delete',true)))return;
+    const i=+el.dataset.i;
+    if(el.dataset.ctx==='draft'){const d=S.draft,[a]=d.data.audio.splice(i,1);if(d.added.includes(a.id)){await delBlob(a.id);d.added=d.added.filter(x=>x!==a.id)}else d.removed.push(a.id);saveDraft()}
+    else{const m=machineById(el.dataset.mid),x=m.qa[+el.dataset.qi],[a]=x.audio.splice(i,1);await delBlob(a.id);m.updated=now();await Store.put('machines',m)}
+    rerender();
+  },
+  photoDel:async el=>{const d=S.draft,[p]=d.data.photos.splice(+el.dataset.i,1);if(d.added.includes(p.id)){await delBlob(p.id);d.added=d.added.filter(x=>x!==p.id)}else d.removed.push(p.id);saveDraft();rerender()},
+  viewPhoto:async el=>{openModal(`<img data-blob="${esc(el.dataset.id)}" alt=""><p>${esc(el.dataset.cap||'')}</p><div class="mbar"><button class="btn ghost" data-act="closeModal">Close</button></div>`,'viewer')},
+  closeModal:()=>closeModal(),
+  cYes:()=>{const r=confirmRes;confirmRes=null;closeModal();r&&r(true)},
+  cNo:()=>{closeModal()},
+  cPick:el=>{const v=S.chooseOpts[+el.dataset.i].val,r=confirmRes;confirmRes=null;closeModal();r&&r(v)},
+  machineForm:el=>machineForm(el&&el.dataset.id?machineById(el.dataset.id):null,el&&el.dataset.ctx),
+  machineSave:async el=>{
+    const v=k=>{const i=$(`[data-mf="${k}"]`);return i.type==='checkbox'?i.checked:i.value.trim()};
+    if(!v('name')){toast('Give it a name');return}
+    let m=el.dataset.id?machineById(el.dataset.id):null;
+    if(!m)m={id:uid('m'),photo:'',qa:seedQA(v('usesAir')),created:now()};
+    Object.assign(m,{name:v('name'),type:v('type'),area:v('area'),usesAir:v('usesAir'),notes:v('notes'),updated:now()});
+    await Store.put('machines',m);upsert(S.machines,m);closeModal();
+    if(el.dataset.ctx==='wiz'&&S.draft){S.draft.data.machineId=m.id;S.draft.step=2;saveDraft();render();window.scrollTo(0,0)}
+    else if(!el.dataset.id)go('#machine-'+m.id);else rerender();
+    toast('Machine saved');
+  },
+  delMachine:async el=>{
+    const m=machineById(el.dataset.id),n=setupsOn(m.id).length;
+    if(!(await ask(`Delete <b>${esc(m.name)}</b> and its know-how answers?${n?` Its ${n} setups stay in the book but lose their machine.`:''}`,'Delete',true)))return;
+    for(const s of setupsOn(m.id)){s.machineId='';s.updated=now();await Store.put('setups',s)}
+    await delBlob(m.photo);for(const x of m.qa||[])for(const a of x.audio||[])await delBlob(a.id);
+    await Store.del('machines',m.id);S.machines=S.machines.filter(x=>x.id!==m.id);if(S.mf===m.id)S.mf='';go('#machines');
+  },
+  qaAdd:async el=>{const m=machineById(el.dataset.mid),i=$('#qaNew'),q=i.value.trim();if(!q)return;m.qa=m.qa||[];m.qa.push({id:uid('q'),q,a:'',audio:[]});m.updated=now();await Store.put('machines',m);rerender()},
+  toolForm:el=>toolForm(el&&el.dataset.id?toolById(el.dataset.id):null),
+  toolSave:async el=>{
+    const v=k=>$(`[data-tf="${k}"]`).value.trim();
+    if(!v('code')&&!v('size')){toast('Give it a tag or a size');return}
+    let t=el.dataset.id?toolById(el.dataset.id):null;
+    if(!t)t={id:uid('t'),photo:'',created:now()};
+    Object.assign(t,{code:v('code').toUpperCase(),size:v('size'),name:v('name'),kind:v('kind'),machineId:v('machineId'),loc:v('loc'),notes:v('notes'),updated:now()});
+    await Store.put('tools',t);upsert(S.tools,t);closeModal();
+    const ctx=el.dataset.ctx||'';
+    if(ctx.startsWith('slot:')&&S.draft){const k=ctx.slice(5);S.draft.data[k].toolId=t.id;S.draft.data[k].size=t.size||t.code;saveDraft();rerender()}
+    else if(!el.dataset.id)go('#tool-'+t.id);else rerender();
+    toast('Crib tag saved');
+  },
+  delTool:async el=>{
+    const t=toolById(el.dataset.id),u=toolUses(t.id);
+    if(!(await ask(`Delete crib tag <b class="mono">${esc(toolLabel(t))}</b>?${u.length?` ${u.length} setups keep the size but lose the link.`:''}`,'Delete',true)))return;
+    for(const s of u){if(s.upper.toolId===t.id)s.upper.toolId='';if(s.lower.toolId===t.id)s.lower.toolId='';await Store.put('setups',s)}
+    await delBlob(t.photo);await Store.del('tools',t.id);S.tools=S.tools.filter(x=>x.id!==t.id);go('#crib');
+  },
+  editSetup:async el=>{if(!(await pendingDraft()))return;const s=setupById(el.dataset.id);S.draft={isNew:false,step:0,stampNow:false,showPsi:false,orig:snapshot(s),added:[],removed:[],data:clone(s)};saveDraft();go('#edit')},
+  dupSetup:async el=>{if(!(await pendingDraft()))return;const s=clone(setupById(el.dataset.id));Object.assign(s,{id:uid('s'),pn:'',rev:'',photos:[],audio:[],verified:null,by:S.settings.me||'',created:0,updated:0,demo:undefined});
+    S.draft={isNew:true,step:0,stampNow:false,showPsi:false,orig:'',added:[],removed:[],data:s};saveDraft();go('#edit');toast('Tooling, settings and steps copied. Enter the new part number.',3200)},
+  printSetup:el=>printSheets([setupById(el.dataset.id)]),
+  printAll:()=>printSheets(S.setups.slice().sort((a,b)=>((machineById(a.machineId)||{}).name||'').localeCompare((machineById(b.machineId)||{}).name||'')||a.pn.localeCompare(b.pn))),
+  delSetup:async el=>{
+    const s=setupById(el.dataset.id);
+    if(!(await ask(`Delete the setup for <b class="mono">${esc(s.pn)}</b>, with its photos and voice notes?`,'Delete',true)))return;
+    for(const p of s.photos)await delBlob(p.id);for(const a of s.audio)await delBlob(a.id);
+    await Store.del('setups',s.id);S.setups=S.setups.filter(x=>x.id!==s.id);go('#');toast('Deleted');
+  },
+  stampSetup:el=>{
+    openModal(`<h3>Stamp as verified</h3><p>She has looked over this sheet and it matches how she runs it.</p>
+    <label class="fl">Verified by<input id="stampBy" value="${esc(S.settings.expert)}" placeholder="Her name"></label>
+    <div class="mbar"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn go" data-act="stampGo" data-id="${el.dataset.id}">Stamp it</button></div>`);
+  },
+  stampGo:async el=>{
+    const by=$('#stampBy').value.trim();if(!by){toast('Who verified it?');return}
+    if(!S.settings.expert){S.settings.expert=by;saveSettings()}
+    const s=setupById(el.dataset.id);s.verified={by,init:initials(by),at:Math.max(now(),s.updated)};
+    await Store.put('setups',s);closeModal();rerender();toast('Stamped');
+  },
+  pasteTargets:()=>openModal(`<h3>Part list</h3><p>Paste part numbers, one per line or comma separated. Straight from a spreadsheet column works.</p><textarea id="tgt" rows="9" class="mono" placeholder="4471203-05&#10;4471203-07&#10;…">${esc(S.targets.join('\n'))}</textarea><div class="mbar"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn go" data-act="targetsSave">Save list</button></div>`),
+  targetsSave:async()=>{
+    const seen=new Set(),out=[];
+    for(const p of $('#tgt').value.split(/[\n,;\t]+/).map(x=>x.trim().toUpperCase()).filter(Boolean)){const k=normPN(p);if(k&&!seen.has(k)){seen.add(k);out.push(p)}}
+    S.targets=out;await saveTargets();closeModal();rerender();toast(out.length+' part numbers on the list');
+  },
+  backup:()=>backupModal(),
+  exportFile:async()=>{
+    toast('Packing photos and audio…');
+    const data=JSON.stringify(await buildBackup()),stamp=new Date().toISOString().slice(0,10);
+    const f1=new File([data],`blackbook-backup-${stamp}.json`,{type:'application/json'}),f2=new File([data],`blackbook-backup-${stamp}.txt`,{type:'text/plain'});
+    if(S.dl){
+      try{await S.dl.save({filename:f1.name,data:new Blob([data],{type:'application/json'})});S.settings.lastBackup=now();saveSettings();toast('Backup saved')}
+      catch(e){if(e&&e.code==='declined')return;toast('Could not save here. Use "Copy backup as text".',3200)}
+      return;
+    }
+    let done=false;
+    try{for(const f of [f1,f2]){if(!done&&navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'BLACKBOOK backup'});done=true}}}catch(e){if(e&&e.name==='AbortError')return}
+    if(!done){const a=document.createElement('a');a.href=URL.createObjectURL(f1);a.download=f1.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}
+    S.settings.lastBackup=now();saveSettings();
+    toast(IN_FRAME?'If nothing downloaded, use "Copy backup as text".':'Backup saved',3200);
+  },
+  exportCopy:async()=>{
+    try{const data=JSON.stringify(await buildBackup());await navigator.clipboard.writeText(data);S.settings.lastBackup=now();saveSettings();toast('Backup copied. Paste it into an email or note.',3200)}
+    catch(e){toast('Copy was blocked here.')}
+  },
+  importPaste:()=>openModal(`<h3>Paste backup</h3><textarea id="imp" rows="8" class="mono" placeholder='{"app":"blackbook",…}'></textarea><div class="mbar"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn go" data-act="importPasteGo">Import</button></div>`),
+  importPasteGo:async()=>{try{const n=await importData(JSON.parse($('#imp').value));closeModal();render();toast(n+' records brought in')}catch(e){toast(e.message||'Could not read that backup',3200)}},
+  demoLoad:async()=>{await loadDemo();S.lastHash=null;go('#');toast('Demo loaded. Everything marked DEMO.')},
+  demoClear:async()=>{if(!(await ask('Remove all demo machines, tools and setups?','Remove',true)))return;await clearDemo();render();toast('Demo removed')},
+  wipe:async()=>{
+    if(!(await ask('Erase <b>every</b> setup, machine, tool, photo and voice note on this device? Back up first if you are not sure.','Erase all',true)))return;
+    for(const s of STORES)await Store.clear(s);
+    Object.assign(S,{machines:[],tools:[],setups:[],targets:[],draft:null,settings:{shop:'',me:'',expert:'',lastBackup:0}});
+    urlCache.clear();banners();go('#');toast('Erased');
+  },
+};
+
+/* ============ events ============ */
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-act]');
+  if(el){e.preventDefault();const f=A[el.dataset.act];if(f)Promise.resolve(f(el,e)).catch(err=>{console.error(err);toast('Something went wrong: '+(err&&err.message||err),3500)});return}
+  if(e.target.id==='modal'&&!modalLock)closeModal();
+});
+function onField(e){
+  const el=e.target;
+  if(el.dataset.bind&&S.draft){
+    setPath(S.draft.data,el.dataset.bind,el.value);saveDraft();
+    if(el.dataset.bind==='pn'){const w=$('#dupWarn');if(w)w.innerHTML=dupWarn(S.draft.data)}
+    return;
+  }
+  if(el.dataset.set){S.settings[el.dataset.set]=el.value.trim();saveSettings();if(el.dataset.set==='shop')banners();return}
+  if(el.dataset.check==='stampNow'&&S.draft){S.draft.stampNow=el.checked;saveDraft();return}
+  if(el.dataset.qa!==undefined){const m=machineById(el.dataset.mid),x=m.qa[+el.dataset.qa];x.a=el.value;m.updated=now();saveMachineSoon(m);el.closest('.qa').classList.toggle('done',qaDone(x));return}
+  if(el.id==='q'&&e.type==='input'){S.q=el.value;$('#results').innerHTML=resultsHTML();return}
+  if(el.id==='cq'&&e.type==='input'){S.cq=el.value;const q=el.value.toLowerCase();$('#tagList').innerHTML=S.tools.filter(t=>!q||[t.code,t.size,t.name,t.kind,t.loc].join(' ').toLowerCase().includes(q)).sort((a,b)=>toolLabel(a).localeCompare(toolLabel(b))).map(tagHTML).join('');return}
+}
+document.addEventListener('input',onField);
+document.addEventListener('change',async e=>{
+  const el=e.target;
+  if(el.dataset.file){
+    const files=[...(el.files||[])];if(!files.length)return;
+    const kind=el.dataset.file;
+    try{
+      if(kind==='draftPhoto'){
+        toast('Saving photo'+(files.length>1?'s':'')+'…');
+        for(const f of files){const b=await compressImage(f);const id=await saveBlob(b);const d=S.draft,used=d.data.photos.map(p=>p.cap);
+          d.data.photos.push({id,cap:CAPS.find(c=>!used.includes(c)&&c!=='Bad part')||'Other'});d.added.push(id)}
+        saveDraft();rerender();
+      }else if(kind==='machinePhoto'||kind==='toolPhoto'){
+        const coll=kind==='machinePhoto'?'machines':'tools',rec=S[coll].find(x=>x.id===el.dataset.id);
+        const id=await saveBlob(await compressImage(files[0]));await delBlob(rec.photo);rec.photo=id;rec.updated=now();await Store.put(coll,rec);rerender();
+      }else if(kind==='draftAudio'){
+        const r=await audioFromFile(files[0]);const d=S.draft;d.data.audio.push({...r,label:'Voice note '+(d.data.audio.length+1)});d.added.push(r.id);saveDraft();rerender();
+      }else if(kind==='qaAudio'){
+        const m=machineById(el.dataset.mid),x=m.qa[+el.dataset.qi],r=await audioFromFile(files[0]);x.audio=x.audio||[];x.audio.push({...r,label:'Answer '+(x.audio.length+1)});m.updated=now();await Store.put('machines',m);rerender();
+      }else if(kind==='import'){
+        const n=await importData(JSON.parse(await files[0].text()));closeModal();render();toast(n+' records brought in');
+      }
+    }catch(err){console.error(err);toast(err.message||'Could not read that file',3200)}
+    el.value='';return;
+  }
+  onField(e);
+});
+
+/* ============ boot ============ */
+(async function init(){
+  await Store.init();
+  try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+  await loadAll();
+  banners();
+  render();
+  try{if(window.claude&&typeof window.claude.use==='function')window.claude.use('downloads').then(d=>{S.dl=d||null}).catch(()=>{})}catch(e){}
+})();
+</script>
+</body>
+</html>
