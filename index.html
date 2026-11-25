@@ -1127,7 +1127,7 @@ const A={
   },
   importPaste:()=>openModal(`<h3>Paste backup</h3><textarea id="imp" rows="8" class="mono" placeholder='{"app":"blackbook",…}'></textarea><div class="mbar"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn go" data-act="importPasteGo">Import</button></div>`),
   importPasteGo:async()=>{try{const n=await importData(JSON.parse($('#imp').value));closeModal();render();toast(n+' records brought in')}catch(e){toast(e.message||'Could not read that backup',3200)}},
-  demoLoad:async()=>{await loadDemo();S.lastHash=null;go('#');toast('Demo loaded. Everything marked DEMO.')},
+  demoLoad:async()=>{await clearDemo();await loadDemo();S.lastHash=null;go('#');toast('Demo loaded. Everything marked DEMO.')},
   demoClear:async()=>{if(!(await ask('Remove all demo machines, tools and setups?','Remove',true)))return;await clearDemo();render();toast('Demo removed')},
   syncJoin:async()=>{const c=($('#syncCode')||{}).value||'';if(!c.trim()){toast('Enter the shop code');return}
     try{if(await Sync.join(c)){render();toast('Joined '+Sync.cfg.name)}}catch(e){toast(e.message||'Could not join',3200)}},
@@ -1230,6 +1230,7 @@ const Sync={cfg:null,applying:false,q:new Map(),bq:new Map(),busy:false,status:'
       else return;
     }else{
       const id=del?v:v.id;if(this.local(id))return;
+      if(del?(S[store]||[]).some(x=>x.id===id&&x.demo):v.demo)return;
       const kind=store.replace(/s$/,'');
       this.q.set(id,del?{id,kind,data:null,updated:now(),deleted:true}:{id,kind,data:v,updated:v.updated||now(),deleted:false});
     }
@@ -1251,7 +1252,7 @@ const Sync={cfg:null,applying:false,q:new Map(),bq:new Map(),busy:false,status:'
     this.applying=true;
     try{
       for(const x of r.records||[]){
-        if(this.q.has(x.id)||this.local(x.id))continue;
+        if(this.q.has(x.id)||this.local(x.id)||(x.data&&x.data.demo))continue;
         if(x.kind==='targets'){S.targets=x.data||[];await Store.put('meta',{id:'targets',data:S.targets});changed++;continue}
         if(x.kind==='shared'){S.settings.shop=x.data.shop||S.settings.shop;S.settings.expert=x.data.leads||S.settings.expert;await Store.put('meta',{id:'settings',data:S.settings});changed++;continue}
         const store=x.kind+'s';if(!['machines','tools','setups'].includes(store))continue;
