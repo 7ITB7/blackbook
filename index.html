@@ -309,6 +309,14 @@ ol.steps li::before{content:counter(s);position:absolute;left:11px;top:9px;width
 /* print */
 #print{display:none}
 @page{size:letter;margin:.4in}
+details.talk{margin:14px;border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:0 12px}
+details.talk summary{font:800 12px var(--cond);letter-spacing:.12em;text-transform:uppercase;color:var(--mute);padding:12px 0;cursor:pointer}
+.talk-l .tl{display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;padding:8px 0;border-top:1px solid var(--line);font-size:15px}
+.talk-l .tl small{font:700 12px var(--mono);color:var(--mute);min-width:38px;padding-top:2px}
+.talk-l .tl span{flex:1 1 200px}
+.talk-l .tb{display:flex;gap:6px;flex:0 0 auto!important}
+.vidbtn{display:flex;align-items:center;justify-content:center;gap:8px}
+#vprog .bar{margin-top:8px}
 @media print{
   body{background:#fff!important;color:#000}
   #app,#modal,#toast{display:none!important}
@@ -594,6 +602,9 @@ function vLookup(){
       <label class="fl">Your name<input data-set="me" value="${esc(S.settings.me)}" placeholder="Who's writing it down"></label>
       <label class="fl">Leadmen<input data-set="expert" value="${esc(S.settings.expert)}" placeholder="Names, separated by commas"></label>
       <div class="btns" style="margin:16px 0 0"><button class="btn go" data-act="machineForm">+ Add first machine</button><button class="btn ghost" data-act="demoLoad">Load demo data</button></div>
+      <div class="btns" style="margin:10px 0 0"><label class="btn vidbtn">From video<input type="file" accept="video/*" hidden data-file="video"></label></div>
+      <div class="sec" style="margin-top:22px">Shared book</div><p class="hint" id="syncline">${syncLine()}</p>
+      ${Sync.on()?'':`<label class="fl">Shop code<input id="syncCode" autocapitalize="none" autocomplete="off" placeholder="From your leadman"></label><div class="btns" style="margin:10px 0 0"><button class="btn go" data-act="syncJoin">Join shop book</button></div>`}
     </div>`;
   }
   const backupOld=S.setups.filter(s=>!s.demo).length>=3&&now()-(S.settings.lastBackup||0)>7*86400000;
@@ -602,6 +613,7 @@ function vLookup(){
   <input id="q" type="search" inputmode="search" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Part number…" value="${esc(S.q)}">
   ${S.q?'<button class="clr" data-act="clearQ" aria-label="Clear">✕</button>':''}</div>
   ${S.machines.length>1?`<div class="chips scroll"><button class="chip ${!S.mf?'on':''}" data-act="mfilter" data-id="">All machines</button>${S.machines.map(m=>`<button class="chip ${S.mf===m.id?'on':''}" data-act="mfilter" data-id="${m.id}">${esc(m.name)}</button>`).join('')}</div>`:''}
+  <div class="btns" style="margin-top:8px"><label class="btn vidbtn">From video<input type="file" accept="video/*" hidden data-file="video"></label></div>
   <div id="results">${resultsHTML()}</div>`;
 }
 
@@ -626,6 +638,7 @@ function vSetup(id){
   ${steps.length?`<div class="sec">Steps</div><ol class="steps">${steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}
   ${String(s.watch||'').trim()?`<div class="haz"><h4>Watch out</h4><p>${esc(s.watch)}</p></div>`:''}
   ${s.audio.length?`<div class="sec">Voice notes</div><div class="auds">${audioList(s.audio)}</div>`:''}
+  ${transcriptHTML(s.transcript,false)}
   ${s.photos.length?`<div class="sec">Photos <span class="cnt">${s.photos.length}</span></div><div class="ph-grid">${s.photos.map(p=>`<figure class="ph"><div class="ph-img" data-blob="${p.id}" data-act="viewPhoto" data-id="${p.id}" data-cap="${esc(p.cap)}"></div><figcaption>${esc(p.cap)}</figcaption></figure>`).join('')}</div>`:''}
   ${st!=='ok'?`<div class="verify"><p>${st==='stale'?'This setup was changed after it was stamped. Have a leadman look it over again.':'Has a leadman checked this sheet against how the job really runs?'}</p><button class="btn go wide" data-act="stampSetup" data-id="${s.id}">Stamp as verified</button></div>`:''}
   ${gaps.length?`<div class="gaprow">${gaps.map(g=>`<span class="gap">${esc(g)}</span>`).join('')}</div>`:''}
@@ -703,6 +716,7 @@ function wHow(s){
   <button class="btn ghost wide" data-act="stepAdd">+ Add step</button>
   <div class="slot-h hz">Watch-outs</div>
   <textarea data-bind="watch" rows="4" placeholder="What goes wrong. What to check. The thing nobody would guess.">${esc(s.watch)}</textarea>
+  ${transcriptHTML(s.transcript,true)}
   <div class="slot-h" style="margin-top:20px">Voice notes</div>
   <p class="hint">Hit record and let the leadman talk through it while he sets up. His words, kept.</p>
   ${audioList(s.audio,'draft')}
@@ -740,7 +754,7 @@ function vMachine(id){
   <div class="mtitle"><h2>${esc(m.name)}</h2><p>${esc(m.type||'')}${m.area?' · '+esc(m.area):''}</p>
   ${m.usesAir!==false?'<span class="badge">Shop air · PSI tracked</span>':''}<span class="badge">${ss.length} setups</span></div>
   ${m.notes?`<p class="pad" style="margin-top:10px;white-space:pre-wrap">${esc(m.notes)}</p>`:''}
-  <div class="btns"><button class="btn go" data-act="newSetup" data-mid="${m.id}">+ Capture setup here</button><button class="btn" data-act="machineForm" data-id="${m.id}">Edit machine</button></div>
+  <div class="btns"><button class="btn go" data-act="newSetup" data-mid="${m.id}">+ Capture setup here</button><label class="btn vidbtn">From video<input type="file" accept="video/*" hidden data-file="video" data-mid="${m.id}"></label><button class="btn" data-act="machineForm" data-id="${m.id}">Edit machine</button></div>
   <div class="sec">Ask the leadmen <span class="cnt">${qa.filter(qaDone).length}/${qa.length}</span></div>
   <p class="hint pad">The stuff that isn't tied to one part number. Type the answer or record a leadman saying it.</p>
   ${qa.map((x,i)=>`<div class="qa ${qaDone(x)?'done':''}"><div class="q">${esc(x.q)}</div><textarea rows="3" data-qa="${i}" data-mid="${m.id}" placeholder="Answer…">${esc(x.a)}</textarea>${audioList(x.audio,'qa',`data-mid="${m.id}" data-qi="${i}"`)}<div class="recrow"><button class="btn rec sm" data-act="recQA" data-mid="${m.id}" data-qi="${i}">● Record</button><label class="btn ghost sm">Attach audio<input type="file" accept="audio/*" hidden data-file="qaAudio" data-mid="${m.id}" data-qi="${i}"></label></div></div>`).join('')}
@@ -823,6 +837,10 @@ function vMore(){
   <label class="fl">Shop / department<input data-set="shop" value="${esc(S.settings.shop)}" placeholder="Shows in the header and on printed sheets"></label>
   <label class="fl">Your name<input data-set="me" value="${esc(S.settings.me)}"></label>
   <label class="fl">Leadmen<input data-set="expert" value="${esc(S.settings.expert)}" placeholder="Names, separated by commas. They sign off setups."></label></div>
+  <div class="sec">Shared book</div>
+  <p class="hint pad" id="syncline">${syncLine()}</p>
+  ${Sync.on()?`<div class="btns"><button class="btn go" data-act="syncNow">Sync now</button><button class="btn danger" data-act="syncLeave">Stop sharing on this phone</button></div>`:`<div class="setrow"><label class="fl">Shop code<input id="syncCode" autocapitalize="none" autocomplete="off" placeholder="From your leadman"></label></div><div class="btns"><button class="btn go" data-act="syncJoin">Join shop book</button></div>`}
+  <p class="hint pad small">Demo only until management and quality say where real part data can live.</p>
   <div class="sec">Backup</div>
   <p class="hint pad">The book lives on this device. Back it up to your work email or drive, and import the file on another phone to copy the whole book over (photos and voice notes included). Last backup: <b>${ago(S.settings.lastBackup)}</b>.</p>
   <div class="btns"><button class="btn go" data-act="backup">Back up / restore</button></div>
@@ -1111,6 +1129,12 @@ const A={
   importPasteGo:async()=>{try{const n=await importData(JSON.parse($('#imp').value));closeModal();render();toast(n+' records brought in')}catch(e){toast(e.message||'Could not read that backup',3200)}},
   demoLoad:async()=>{await loadDemo();S.lastHash=null;go('#');toast('Demo loaded. Everything marked DEMO.')},
   demoClear:async()=>{if(!(await ask('Remove all demo machines, tools and setups?','Remove',true)))return;await clearDemo();render();toast('Demo removed')},
+  syncJoin:async()=>{const c=($('#syncCode')||{}).value||'';if(!c.trim()){toast('Enter the shop code');return}
+    try{if(await Sync.join(c)){render();toast('Joined '+Sync.cfg.name)}}catch(e){toast(e.message||'Could not join',3200)}},
+  syncNow:()=>Sync.run(),
+  syncLeave:async()=>{if(!(await ask('Stop sharing on this phone? The setups already here stay on this phone.','Stop sharing',true)))return;await Sync.leave();render();toast('This phone is on its own now')},
+  talkStep:el=>{const d=S.draft,l=(d.data.transcript||[])[+el.dataset.i];if(!l)return;d.data.steps.push(l.text);saveDraft();rerender();toast('Added as step '+d.data.steps.length)},
+  talkWatch:el=>{const d=S.draft,l=(d.data.transcript||[])[+el.dataset.i];if(!l)return;d.data.watch=(String(d.data.watch||'').trim()+' '+l.text).trim();saveDraft();rerender();toast('Added to watch-outs')},
   wipe:async()=>{
     if(!(await ask('Erase <b>every</b> setup, machine, tool, photo and voice note on this device? Back up first if you are not sure.','Erase all',true)))return;
     for(const s of STORES)await Store.clear(s);
@@ -1158,6 +1182,8 @@ document.addEventListener('change',async e=>{
         const r=await audioFromFile(files[0]);const d=S.draft;d.data.audio.push({...r,label:'Voice note '+(d.data.audio.length+1)});d.added.push(r.id);saveDraft();rerender();
       }else if(kind==='qaAudio'){
         const m=machineById(el.dataset.mid),x=m.qa[+el.dataset.qi],r=await audioFromFile(files[0]);x.audio=x.audio||[];x.audio.push({...r,label:'Answer '+(x.audio.length+1)});m.updated=now();await Store.put('machines',m);rerender();
+      }else if(kind==='video'){
+        const f=files[0];el.value='';if(await pendingDraft())await fromVideo(f,el.dataset.mid||'');return;
       }else if(kind==='import'){
         const n=await importData(JSON.parse(await files[0].text()));closeModal();render();toast(n+' records brought in');
       }
@@ -1178,13 +1204,241 @@ document.addEventListener('change',async e=>{
   apply(document.documentElement.dataset.theme==='light'?'light':'dark');
   document.getElementById('themeBtn').addEventListener('click',()=>{const t=document.documentElement.dataset.theme==='light'?'dark':'light';try{localStorage.setItem('bb-theme',t)}catch(e){}apply(t)});
 })();
+
+/* ============ shared book (Supabase) ============ */
+const SB_URL='https://ucnufxsgyhjsvrqvcutx.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjbnVmeHNneWhqc3ZycXZjdXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU2MTI5MzYsImV4cCI6MjExMTE4ODkzNn0.HPvIm98JcX5OyWpFdkpB5eaOLFfWE7ulBLnRq_W9DGA';
+const Sync={cfg:null,applying:false,q:new Map(),bq:new Map(),busy:false,status:'',last:0,err:'',
+  on(){return !!(this.cfg&&this.cfg.code)},
+  async rpc(fn,args){
+    const r=await fetch(SB_URL+'/rest/v1/rpc/'+fn,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+SB_KEY},body:JSON.stringify(args)});
+    const t=await r.text();let j=null;try{j=t?JSON.parse(t):null}catch(e){}
+    if(!r.ok)throw new Error((j&&(j.message||j.hint))||('Server said '+r.status));
+    return j;
+  },
+  async load(){const c=await Store.get('meta','sync');this.cfg=c?c.data:null},
+  save(){return Store.put('meta',{id:'sync',data:this.cfg})},
+  local(id){return !!(this.cfg&&this.cfg.localOnly&&this.cfg.localOnly.includes(id))},
+  /* called by Store hooks */
+  note(store,v,del){
+    if(!this.on()||this.applying)return;
+    if(store==='blobs'){const id=del?v:v.id;if(this.local(id))return;this.bq.set(id,del?{del:true}:v);}
+    else if(store==='meta'){
+      if(del||!v)return;
+      if(v.id==='targets')this.q.set('targets',{id:'targets',kind:'targets',data:v.data,updated:now()});
+      else if(v.id==='settings')this.q.set('shared',{id:'shared',kind:'shared',data:{shop:v.data.shop||'',leads:v.data.expert||''},updated:now()});
+      else return;
+    }else{
+      const id=del?v:v.id;if(this.local(id))return;
+      const kind=store.replace(/s$/,'');
+      this.q.set(id,del?{id,kind,data:null,updated:now(),deleted:true}:{id,kind,data:v,updated:v.updated||now(),deleted:false});
+    }
+    soon('sync',()=>this.run(),1500);
+  },
+  async push(){
+    for(const [id,v] of [...this.bq]){
+      if(v.del)await this.rpc('bb_blob_del',{code:this.cfg.code,bid:id});
+      else{const b=v.blob||(await Store.get('blobs',id)||{}).blob;if(b)await this.rpc('bb_blob_put',{code:this.cfg.code,bid:id,btype:v.type||b.type,bdata:await b64(b)})}
+      this.bq.delete(id);
+    }
+    const recs=[...this.q.values()];
+    for(let i=0;i<recs.length;i+=200)await this.rpc('bb_push',{code:this.cfg.code,recs:recs.slice(i,i+200)});
+    recs.forEach(r=>{if(this.q.get(r.id)===r)this.q.delete(r.id)});
+  },
+  async pull(){
+    const r=await this.rpc('bb_pull',{code:this.cfg.code,since:this.cfg.seq||0});
+    let changed=0;const need=[];
+    this.applying=true;
+    try{
+      for(const x of r.records||[]){
+        if(this.q.has(x.id)||this.local(x.id))continue;
+        if(x.kind==='targets'){S.targets=x.data||[];await Store.put('meta',{id:'targets',data:S.targets});changed++;continue}
+        if(x.kind==='shared'){S.settings.shop=x.data.shop||S.settings.shop;S.settings.expert=x.data.leads||S.settings.expert;await Store.put('meta',{id:'settings',data:S.settings});changed++;continue}
+        const store=x.kind+'s';if(!['machines','tools','setups'].includes(store))continue;
+        const mine=S[store].find(y=>y.id===x.id);
+        if(x.deleted){if(mine){await Store.del(store,x.id);S[store]=S[store].filter(y=>y.id!==x.id);changed++}continue}
+        if(mine&&(mine.updated||0)>(x.updated||0))continue;
+        await Store.put(store,x.data);upsert(S[store],x.data);changed++;
+        for(const b of blobIdsOf(x.data))if(!(await Store.get('blobs',b)))need.push(b);
+      }
+      for(const b of r.blobs||[])if(b.deleted){await Store.del('blobs',b.id)}
+      for(let i=0;i<need.length;i+=6){
+        const got=await this.rpc('bb_blob_get',{code:this.cfg.code,ids:need.slice(i,i+6)});
+        for(const g of got||[])await Store.put('blobs',{id:g.id,type:g.type,blob:unb64(g.data,g.type),created:now()});
+        if(got&&got.length)changed++;
+      }
+    }finally{this.applying=false}
+    this.cfg.seq=Math.max(this.cfg.seq||0,r.seq||0);await this.save();
+    return changed;
+  },
+  async run(){
+    if(!this.on()||this.busy)return;
+    if(!navigator.onLine){this.err='Offline. Changes wait on this phone.';paintSync();return}
+    this.busy=true;this.status='Syncing…';paintSync();
+    try{await this.push();const c=await this.pull();this.err='';this.last=now();if(c&&S.route.v!=='edit')rerender()}
+    catch(e){this.err=e.message||'Sync failed'}
+    finally{this.busy=false;this.status='';paintSync()}
+  },
+  async join(code){
+    code=String(code||'').trim().toLowerCase();
+    const j=await this.rpc('bb_join',{code});
+    const ids=[...S.machines,...S.tools,...S.setups].filter(x=>!x.demo).map(x=>x.id);
+    let share='share';
+    if(ids.length)share=await choose(`This phone already has <b>${S.setups.length}</b> setup${S.setups.length===1?'':'s'}. Share them with <b>${esc(j.name)}</b>?<br><span class="muted small">Pick "Keep on this phone" for anything real that isn't cleared to go online.</span>`,[{label:'Share them',val:'share',cls:'go'},{label:'Keep on this phone',val:'keep',cls:''},{label:'Cancel',val:null,cls:'ghost'}]);
+    if(!share)return false;share=share==='share';
+    const localOnly=share?[]:[...ids,...[...S.machines,...S.tools,...S.setups].filter(x=>ids.includes(x.id)).flatMap(blobIdsOf)];
+    this.cfg={code,name:j.name,seq:0,localOnly};await this.save();
+    if(share){
+      for(const k of ['machines','tools','setups'])for(const v of S[k])this.note(k,v);
+      for(const k of ['machines','tools','setups'])for(const v of S[k])for(const b of blobIdsOf(v)){const r=await Store.get('blobs',b);if(r)this.bq.set(b,r)}
+    }
+    await this.run();return true;
+  },
+  async leave(){this.cfg=null;await Store.del('meta','sync');this.q.clear();this.bq.clear()}
+};
+function blobIdsOf(v){if(!v)return[];const a=[];if(v.photo)a.push(v.photo);(v.photos||[]).forEach(p=>a.push(p.id));(v.audio||[]).forEach(p=>a.push(p.id));(v.qa||[]).forEach(q=>(q.audio||[]).forEach(p=>a.push(p.id)));return a.filter(Boolean)}
+function b64(blob){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]||'');r.onerror=()=>rej(r.error);r.readAsDataURL(blob)})}
+function unb64(s,type){const bin=atob(s||'');const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type:type||''})}
+function paintSync(){const el=$('#syncline');if(el)el.innerHTML=syncLine()}
+function syncLine(){
+  if(!Sync.on())return 'Not shared. This book is only on this phone.';
+  if(Sync.busy)return 'Syncing…';
+  if(Sync.err)return `<span class="warn">${esc(Sync.err)}</span>`;
+  return `Shared with <b>${esc(Sync.cfg.name)}</b>. ${Sync.last?'Synced '+ago(Sync.last)+'.':''}${Sync.cfg.localOnly&&Sync.cfg.localOnly.length?` ${Sync.cfg.localOnly.length} item${Sync.cfg.localOnly.length===1?'':'s'} kept on this phone only.`:''}`;
+}
+(function hookStore(){
+  const put=Store.put.bind(Store),del=Store.del.bind(Store);
+  Store.put=function(s,v){const p=put(s,v);if(['machines','tools','setups','blobs','meta'].includes(s))Sync.note(s,v,false);return p};
+  Store.del=function(s,id){const p=del(s,id);if(['machines','tools','setups','blobs'].includes(s)&&id)Sync.note(s,id,true);return p};
+})();
+window.addEventListener('online',()=>Sync.run());
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')Sync.run()});
+setInterval(()=>{if(document.visibilityState==='visible')Sync.run()},60000);
+
+/* ============ video → setup draft (runs on the phone) ============ */
+const ASR_LIB='https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.6';
+const ASR_MODEL='Xenova/whisper-base.en';
+let asrPipe=null;
+function vprog(t,p){const el=$('#vprog');if(!el)return;el.querySelector('.vt').textContent=t;const b=el.querySelector('.bar i');if(b)b.style.width=Math.max(2,Math.min(100,p||0))+'%'}
+function seekTo(v,t){return new Promise(r=>{const done=()=>{v.removeEventListener('seeked',done);r()};v.addEventListener('seeked',done);v.currentTime=Math.min(Math.max(0,t),Math.max(0,v.duration-0.05));setTimeout(done,4000)})}
+function grab(v,max,q){const sc=Math.min(1,max/Math.max(v.videoWidth,v.videoHeight));const c=document.createElement('canvas');c.width=Math.round(v.videoWidth*sc);c.height=Math.round(v.videoHeight*sc);const x=c.getContext('2d');x.drawImage(v,0,0,c.width,c.height);return c}
+function sharp(c){const w=c.width,h=c.height,d=c.getContext('2d').getImageData(0,0,w,h).data;let s=0,s2=0,n=0;
+  for(let y=1;y<h-1;y+=2)for(let x=1;x<w-1;x+=2){const g=i=>d[i]*.3+d[i+1]*.59+d[i+2]*.11,i=(y*w+x)*4;const l=4*g(i)-g(i-4)-g(i+4)-g(i-w*4)-g(i+w*4);s+=l;s2+=l*l;n++}
+  return s2/n-(s/n)**2}
+async function videoFrames(file,count=8){
+  const v=document.createElement('video');v.muted=true;v.playsInline=true;v.preload='auto';v.src=URL.createObjectURL(file);
+  await new Promise((res,rej)=>{v.onloadeddata=res;v.onerror=()=>rej(new Error('This phone cannot open that video'));setTimeout(()=>rej(new Error('Video took too long to open')),20000)});
+  const dur=v.duration||0,win=dur/count,picks=[];
+  for(let k=0;k<count;k++){
+    let best=null;
+    for(let j=0;j<4;j++){const t=k*win+win*(j+.5)/4;await seekTo(v,t);const c=grab(v,240);const sc=sharp(c);if(!best||sc>best.s)best={t,s:sc}}
+    vprog('Pulling photos from the video…',5+30*(k+1)/count);
+    await seekTo(v,best.t);const c=grab(v,1500);
+    const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',.82));if(blob)picks.push({t:best.t,blob});
+  }
+  URL.revokeObjectURL(v.src);return{dur,picks};
+}
+async function videoAudio(file){
+  const buf=await file.arrayBuffer();
+  const AC=window.AudioContext||window.webkitAudioContext;let ac;
+  try{ac=new AC({sampleRate:16000})}catch(e){ac=new AC()}
+  const ab=await ac.decodeAudioData(buf);try{ac.close()}catch(e){}
+  if(ab.sampleRate===16000)return ab.getChannelData(0);
+  const off=new OfflineAudioContext(1,Math.ceil(ab.duration*16000),16000);const src=off.createBufferSource();src.buffer=ab;src.connect(off.destination);src.start();
+  return (await off.startRendering()).getChannelData(0);
+}
+async function transcribe(pcm){
+  if(!asrPipe){
+    vprog('Getting the speech model (first time only, about 80 MB)…',38);
+    const T=await import(ASR_LIB);
+    const files={};
+    const opts={dtype:'q8',progress_callback:p=>{if(p.status==='progress'&&p.total){files[p.file]=[p.loaded,p.total];const L=Object.values(files).reduce((a,b)=>a+b[0],0),Tt=Object.values(files).reduce((a,b)=>a+b[1],0);vprog(`Getting the speech model (first time only)… ${Math.round(L/1e6)} of ${Math.round(Tt/1e6)} MB`,38+20*L/Tt)}}};
+    let gpu=false;try{gpu=!!(navigator.gpu&&await navigator.gpu.requestAdapter())}catch(e){}
+    if(gpu){try{asrPipe=await T.pipeline('automatic-speech-recognition',ASR_MODEL,{...opts,device:'webgpu'})}catch(e){asrPipe=null}}
+    if(!asrPipe)asrPipe=await T.pipeline('automatic-speech-recognition',ASR_MODEL,{...opts,device:'wasm'});
+  }
+  const secs=pcm.length/16000,out=[];
+  for(let a=0;a<secs;a+=28){
+    vprog(`Listening… ${fmtDur(a)} of ${fmtDur(secs)}`,60+35*a/secs);
+    const seg=new Float32Array(pcm.subarray(Math.floor(a*16000),Math.floor(Math.min(secs,a+28)*16000)));
+    const r=await asrPipe(seg);const txt=String(r&&r.text||'').trim();
+    const parts=(txt.match(/[^.?!]+[.?!]*/g)||[]).map(x=>x.trim()).filter(Boolean),L=txt.length||1;let pos=0;
+    for(const tx of parts){const t=a+(seg.length/16000)*(pos/L);pos+=tx.length+1;if(!/^\[.*\]$|^\(.*\)$/.test(tx)&&(!out.length||out[out.length-1].text!==tx))out.push({t,text:tx})}
+  }
+  return out;
+}
+/* pull what we can out of the talk: numbers and shop words */
+function wordNums(s){
+  const W={zero:0,oh:0,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,fifteen:15,twenty:20,thirty:30,forty:40,fifty:50,sixty:60,seventy:70,eighty:80,ninety:90,hundred:100};
+  return s.replace(/\b(point|thousandths?)\b/gi,m=>/point/i.test(m)?'.':m).replace(/\b(zero|oh|one|two|three|four|five|six|seven|eight|nine)\b/gi,m=>String(W[m.toLowerCase()])).replace(/(\d)\s+(?=\d\b)/g,'$1').replace(/\.\s+(\d)/g,'.$1');
+}
+function parseTalk(lines){
+  const all=lines.map(l=>l.text).join(' '),txt=wordNums(all),U=txt.toUpperCase();
+  const f={pn:'',pns:[],op:'',psi:'',material:'',thk:'',rev:'',upper:'',lower:'',dims:[],parts:[],watch:[]};
+  const pn=[...new Set((U.match(/\b\d{2,3}\s?[A-Z]\s?\d{3,5}(?:-\d+)?\b|\b[A-Z]{1,3}\d{4,}[A-Z0-9-]*\b|\b\d{5,}-\d{1,3}\b/g)||[]).map(x=>x.replace(/\s/g,'')))];
+  f.parts=pn.filter(x=>/^(AN|MS|NAS|BAC|CR)/.test(x));f.pns=pn.filter(x=>!f.parts.includes(x));f.pn=f.pns[0]||'';
+  let m=U.match(/\bOP(?:ERATION)?\.?\s*(?:NUMBER\s*)?(\d{2,3})\b/);if(m)f.op='Op '+m[1].padStart(3,'0');
+  m=U.match(/(\d{2,3})\s*(?:PSI|P\.S\.I|POUNDS)/);if(m)f.psi=m[1];
+  m=U.match(/\bAMS\s?(\d{4})/);if(m)f.material='AMS '+m[1];else{m=all.match(/\b(inconel|titanium|aluminum|aluminium|stainless|hastelloy|waspaloy)\b/i);if(m)f.material=m[1][0].toUpperCase()+m[1].slice(1).toLowerCase()}
+  m=U.match(/\bREV(?:ISION)?\.?\s+([A-Z])\b/);if(m)f.rev=m[1];
+  m=txt.match(/(\.\d{3})\s*(?:thick|thk)/i);if(m)f.thk=m[1];
+  const tsize=re=>{for(const m of all.matchAll(re)){const a=m[0].match(/\b(flat|round|domed?|cup|\d+[\d./]*)\b/i);if(a)return a[1][0].toUpperCase()+a[1].slice(1)}return ''};
+  f.upper=tsize(/\b(top|upper)\s+(punch|die|tool).{0,30}/gi);f.lower=tsize(/\b(bottom|lower)\s+(punch|die|tool).{0,30}/gi);
+  for(const l of lines){
+    const t=wordNums(l.text);
+    const d=t.match(/(\.?\d{2,4})\s*(?:to|-|through|and)\s*(\.?\d{2,4})/i);
+    if(d&&/diam|height|high|thick|flush|gap|upset|head|length|width|radius|angle/i.test(t)){
+      const fix=x=>x.startsWith('.')?x:'.'+x.replace(/^0+/,'').padStart(3,'0');
+      const what=(t.match(/diameter|height|thickness|flush|gap|upset|head|length|width|radius|angle/i)||['Check'])[0];
+      f.dims.push({label:what[0].toUpperCase()+what.slice(1).toLowerCase(),value:fix(d[1])+'–'+fix(d[2])});
+    }
+    if(/\b(careful|watch|make sure|don'?t|never|if there'?s|be sure|caution|gap|hard part)\b/i.test(l.text))f.watch.push(l.text);
+  }
+  return f;
+}
+async function fromVideo(file,mid){
+  openModal(`<h3>Reading the video</h3><div id="vprog"><p class="vt hint">Opening it…</p><div class="bar"><i style="width:2%"></i></div></div><p class="hint small" style="margin-top:10px">Everything happens on this phone. Nothing is sent to an AI service. Keep the screen on.</p>`);
+  modalLock=true;
+  try{
+    const {dur,picks}=await videoFrames(file);
+    vprog('Pulling the sound…',36);
+    let lines=[];
+    try{const pcm=await videoAudio(file);lines=await transcribe(pcm)}catch(e){console.error('ASR',e&&e.message||e);toast('Could not hear the video. Photos only.',3200)}
+    vprog('Filling the sheet…',97);
+    const f=parseTalk(lines);
+    S.draft={isNew:true,step:0,stampNow:false,showPsi:!!f.psi,orig:'',added:[],removed:[],data:blankSetup(f.pn),fromVideo:true};
+    const d=S.draft.data;
+    d.machineId=mid||(S.machines.length===1?S.machines[0].id:'');
+    Object.assign(d,{op:f.op,rev:f.rev,material:f.material,thk:f.thk,psi:f.psi});
+    d.upper.size=f.upper;d.lower.size=f.lower;
+    if(f.parts.length)d.extraTools.push({label:'Hardware',value:f.parts.join(', ')});
+    d.settings=f.dims.slice(0,8);
+    if(f.pns.length>1)d.settings.push({label:'Other part numbers heard',value:f.pns.slice(1,6).join(', ')});
+    if(!f.pn){const nums=[...new Set((lines.map(l=>l.text).join(' ').match(/\b\d[\d-]{4,}\d\b/g)||[]))].slice(0,5);if(nums.length)d.settings.push({label:'Numbers heard (check part #)',value:nums.join(', ')})}
+    d.watch=f.watch.slice(0,6).join(' ');
+    d.transcript=lines;
+    const caps=[];
+    for(let i=0;i<picks.length;i++){const id=await saveBlob(picks[i].blob);d.photos.push({id,cap:caps[i]||'Other',t:picks[i].t});S.draft.added.push(id)}
+    saveDraft();modalLock=false;closeModal();go('#edit');
+    toast(lines.length?`Filled from video. ${lines.length} lines heard. Check every step.`:'Photos pulled. No talking found.',3600);
+  }catch(e){console.error(e);modalLock=false;closeModal();toast(e.message||'Could not read that video',3600)}
+}
+function transcriptHTML(lines,edit){
+  if(!lines||!lines.length)return '';
+  return `<details class="talk"${edit?' open':''}><summary>What was said in the video <span class="cnt">${lines.length}</span></summary>
+  ${edit?'<p class="hint">Tap + Step or + Watch to move a line onto the sheet. Fix the wording after.</p>':''}
+  <div class="talk-l">${lines.map((l,i)=>`<div class="tl"><small>${fmtDur(l.t)}</small><span>${esc(l.text)}</span>${edit?`<span class="tb"><button class="btn sm" data-act="talkStep" data-i="${i}">+ Step</button><button class="btn sm" data-act="talkWatch" data-i="${i}">+ Watch</button></span>`:''}</div>`).join('')}</div></details>`;
+}
+
 /* ============ boot ============ */
 (async function init(){
   await Store.init();
   try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
   await loadAll();
+  await Sync.load();
   banners();
   render();
+  Sync.run();
   try{if(window.claude&&typeof window.claude.use==='function')window.claude.use('downloads').then(d=>{S.dl=d||null}).catch(()=>{})}catch(e){}
 })();
 </script>
