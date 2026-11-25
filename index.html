@@ -375,6 +375,9 @@ const TKINDS=['Upper','Lower','Punch','Die','Rivet set','Anvil','Pin / locator',
 const EXTRA_Q=['Shims','Locator pin','Stripper','Spacer','Backup bar','Fixture'];
 const SET_Q=['Stop / fence','Stroke / depth','Shut height','Dwell','Hits per hole','Fastener','Part orientation','Lube'];
 const STEPS=['Part','Machine','Tooling','Settings','How-to','Photos','Review'];
+function leads(){return String(S.settings.expert||'').split(',').map(x=>x.trim()).filter(Boolean)}
+function addLead(n){n=String(n||'').trim();if(!n)return;const l=leads();if(!l.some(x=>x.toLowerCase()===n.toLowerCase())){l.push(n);S.settings.expert=l.join(', ');saveSettings()}}
+function leadList(){return `<datalist id="leadDL">${leads().map(n=>`<option value="${esc(n)}">`).join('')}</datalist>`}
 function seedQA(air){
   const q=['What do you check first, before running anything on this machine?',
     air?'How do you know the air pressure is right? What happens if it is off?':null,
@@ -475,7 +478,7 @@ function ask(msgHtml,ok='OK',danger=false){return new Promise(r=>{openModal(`<p 
 function choose(msgHtml,opts){return new Promise(r=>{openModal(`<p style="font-size:17px">${msgHtml}</p><div class="mbar" style="flex-direction:column">${opts.map((o,i)=>`<button class="btn ${o.cls||''}" data-act="cPick" data-i="${i}">${esc(o.label)}</button>`).join('')}</div>`);S.chooseOpts=opts;confirmRes=v=>r(v===false?null:v)})}
 const ro=(label,val,cls='')=>`<div class="ro ${cls}"><span>${esc(label)}</span><b>${String(val??'').trim()?esc(val):'<i>—</i>'}</b></div>`;
 function stampSVG(v,stale){
-  const k=uid('k'),name=esc(String(v.by||'Expert').toUpperCase().slice(0,22));
+  const k=uid('k'),name=esc(String(v.by||'Leadman').toUpperCase().slice(0,22));
   return `<span class="stampwrap ${stale?'stale':''}"><svg class="stamp" viewBox="0 0 120 120" role="img" aria-label="Verified by ${name}">
   <defs><filter id="f${k}"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="${(v.at||0)%97}" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 1.75" result="m"/><feComposite in="SourceGraphic" in2="m" operator="in"/></filter>
   <path id="t${k}" d="M13 60A47 47 0 0 1 107 60"/><path id="b${k}" d="M7 60A53 53 0 0 0 113 60"/></defs>
@@ -564,17 +567,17 @@ function resultsHTML(){
   }
   h+=`<div class="reshead"><span>${q.trim()?res.length+' match'+(res.length===1?'':'es'):'Recently updated'}</span><span>${S.setups.length} setups</span></div>`;
   h+=res.slice(0,80).map(setupRow).join('');
-  if(!res.length&&!q.trim())h+=`<p class="hint pad">${S.mf?'No setups on this machine yet.':'No setups yet. Tap <b>Capture</b> while she sets one up.'}</p>`;
+  if(!res.length&&!q.trim())h+=`<p class="hint pad">${S.mf?'No setups on this machine yet.':'No setups yet. Tap <b>Capture</b> while a leadman sets one up.'}</p>`;
   return h;
 }
 function vLookup(){
   if(!S.setups.length&&!S.machines.length){
     return `<div class="empty">
       <h2>Start the book</h2>
-      <p class="hint">Every setup, every size, written down while the person who knows is still here.</p>
-      <ol><li>Add the machines.</li><li>Stand with her while she sets up. Tap <b>Capture</b>: part number, tool sizes, PSI, photos, her voice.</li><li>She checks it and it gets her stamp.</li><li>Paste the part list into <b>Gaps</b> to see what's still missing.</li></ol>
+      <p class="hint">Every setup, every size, written down by the leadmen, so nobody has to remember it.</p>
+      <ol><li>Add the machines.</li><li>Stand with a leadman while he sets up. Tap <b>Capture</b>: part number, tool sizes, PSI, photos, his voice.</li><li>The leadman checks it and it gets his stamp.</li><li>Paste the part list into <b>Gaps</b> to see what's still missing.</li></ol>
       <label class="fl">Your name<input data-set="me" value="${esc(S.settings.me)}" placeholder="Who's writing it down"></label>
-      <label class="fl">The expert<input data-set="expert" value="${esc(S.settings.expert)}" placeholder="The one with all the knowledge"></label>
+      <label class="fl">Leadmen<input data-set="expert" value="${esc(S.settings.expert)}" placeholder="Names, separated by commas"></label>
       <div class="btns" style="margin:16px 0 0"><button class="btn go" data-act="machineForm">+ Add first machine</button><button class="btn ghost" data-act="demoLoad">Load demo data</button></div>
     </div>`;
   }
@@ -607,9 +610,9 @@ function vSetup(id){
   ${kvTable(s.settings)?`<div class="sec">Settings</div>${kvTable(s.settings)}`:''}
   ${steps.length?`<div class="sec">Steps</div><ol class="steps">${steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}
   ${String(s.watch||'').trim()?`<div class="haz"><h4>Watch out</h4><p>${esc(s.watch)}</p></div>`:''}
-  ${s.audio.length?`<div class="sec">Her voice notes</div><div class="auds">${audioList(s.audio)}</div>`:''}
+  ${s.audio.length?`<div class="sec">Voice notes</div><div class="auds">${audioList(s.audio)}</div>`:''}
   ${s.photos.length?`<div class="sec">Photos <span class="cnt">${s.photos.length}</span></div><div class="ph-grid">${s.photos.map(p=>`<figure class="ph"><div class="ph-img" data-blob="${p.id}" data-act="viewPhoto" data-id="${p.id}" data-cap="${esc(p.cap)}"></div><figcaption>${esc(p.cap)}</figcaption></figure>`).join('')}</div>`:''}
-  ${st!=='ok'?`<div class="verify"><p>${st==='stale'?'This setup was changed after it was stamped. Have her look it over again.':'Has the expert checked this sheet against how she actually runs it?'}</p><button class="btn go wide" data-act="stampSetup" data-id="${s.id}">Stamp as verified</button></div>`:''}
+  ${st!=='ok'?`<div class="verify"><p>${st==='stale'?'This setup was changed after it was stamped. Have a leadman look it over again.':'Has a leadman checked this sheet against how the job really runs?'}</p><button class="btn go wide" data-act="stampSetup" data-id="${s.id}">Stamp as verified</button></div>`:''}
   ${gaps.length?`<div class="gaprow">${gaps.map(g=>`<span class="gap">${esc(g)}</span>`).join('')}</div>`:''}
   <div class="btns"><button class="btn go" data-act="editSetup" data-id="${s.id}">Edit</button><button class="btn" data-act="dupSetup" data-id="${s.id}">Copy to new part</button><button class="btn" data-act="printSetup" data-id="${s.id}">Print sheet</button><button class="btn danger" data-act="delSetup" data-id="${s.id}">Delete</button></div>
   <div class="meta">Written by ${esc(s.by||'—')} · created ${fmtDate(s.created)} · updated ${ago(s.updated)}${s.verified?`<br>Stamped by ${esc(s.verified.by)} on ${fmtDate(s.verified.at)}`:''}</div>`;
@@ -679,14 +682,14 @@ function wSettings(s){
   <div class="slot"><div class="slot-h">Stops, depths, counts</div>${rowsEd(s.settings,'settings',SET_Q)}</div>`;
 }
 function wHow(s){
-  return `<h2>How she does it</h2>
+  return `<h2>How it runs</h2>
   <div class="slot-h" style="margin-top:14px">Steps, in order</div>
   <ol class="steps-ed">${s.steps.map((t,i)=>`<li><textarea rows="2" data-bind="steps.${i}" placeholder="Step ${i+1}">${esc(t)}</textarea><div class="mv"><button class="x" data-act="stepMv" data-i="${i}" data-d="-1" aria-label="Move up">↑</button><button class="x" data-act="stepMv" data-i="${i}" data-d="1" aria-label="Move down">↓</button><button class="x" data-act="stepDel" data-i="${i}" aria-label="Remove">✕</button></div></li>`).join('')}</ol>
   <button class="btn ghost wide" data-act="stepAdd">+ Add step</button>
   <div class="slot-h hz">Watch-outs</div>
-  <textarea data-bind="watch" rows="4" placeholder="What goes wrong. What she checks. The thing nobody would guess.">${esc(s.watch)}</textarea>
+  <textarea data-bind="watch" rows="4" placeholder="What goes wrong. What to check. The thing nobody would guess.">${esc(s.watch)}</textarea>
   <div class="slot-h" style="margin-top:20px">Voice notes</div>
-  <p class="hint">Hit record and let her talk through it while she sets up. Her words, kept.</p>
+  <p class="hint">Hit record and let the leadman talk through it while he sets up. His words, kept.</p>
   ${audioList(s.audio,'draft')}
   <div class="recrow"><button class="btn rec" data-act="recDraft">● Record</button><label class="btn ghost">Attach audio<input type="file" accept="audio/*" hidden data-file="draftAudio"></label></div>`;
 }
@@ -702,8 +705,8 @@ function wReview(s){
   <div class="dro">${ro('UPPER',s.upper.size)}${ro('LOWER',s.lower.size)}${showsPsi(s)?ro('PSI',s.psi):''}</div></div>
   ${gaps.length?`<div>${gaps.map(g=>`<span class="gap">${esc(g)}</span>`).join('')}</div><p class="hint">You can save now and fill these in later.</p>`:'<div class="okline" style="margin:8px 0">Complete sheet</div>'}
   <label class="fl">Written down by<input data-bind="by" value="${esc(s.by)}" placeholder="Your name"></label>
-  ${!S.settings.expert?`<label class="fl">Expert's name<input data-set="expert" value="" placeholder="The one with the knowledge"></label>`:''}
-  <label class="check"><input type="checkbox" data-check="stampNow" ${d.stampNow?'checked':''}><span>Stamp as verified by <b>${esc(S.settings.expert||'the expert')}</b>. She went over this sheet and it's how she runs it.</span></label>`;
+  <label class="check"><input type="checkbox" data-check="stampNow" ${d.stampNow?'checked':''}><span>Stamp as verified. A leadman went over this sheet and it's how the job runs.</span></label>
+  ${d.stampNow?`<label class="fl">Leadman signing it<input data-dstamp="1" list="leadDL" value="${esc(d.stampBy||(leads().length===1?leads()[0]:''))}" placeholder="Leadman's name"></label>${leadList()}`:''}`;
 }
 
 /* ============ views: machines ============ */
@@ -716,16 +719,16 @@ function vMachines(){
 }
 function vMachine(id){
   const m=machineById(id);if(!m)return backBar('Not found')+'<p class="hint pad">Machine not found.</p>';
-  const ss=setupsOn(m.id).sort((a,b)=>a.pn.localeCompare(b.pn)),qa=m.qa||[],ex=S.settings.expert||'the expert';
+  const ss=setupsOn(m.id).sort((a,b)=>a.pn.localeCompare(b.pn)),qa=m.qa||[];
   return `${backBar('Machines')}
   <div class="mhero" ${m.photo?`data-blob="${m.photo}"`:''}>${m.photo?'':ICON_C}<label class="btn sm">${m.photo?'Change photo':'Add photo'}<input type="file" accept="image/*" hidden data-file="machinePhoto" data-id="${m.id}"></label></div>
   <div class="mtitle"><h2>${esc(m.name)}</h2><p>${esc(m.type||'')}${m.area?' · '+esc(m.area):''}</p>
   ${m.usesAir!==false?'<span class="badge">Shop air · PSI tracked</span>':''}<span class="badge">${ss.length} setups</span></div>
   ${m.notes?`<p class="pad" style="margin-top:10px;white-space:pre-wrap">${esc(m.notes)}</p>`:''}
   <div class="btns"><button class="btn go" data-act="newSetup" data-mid="${m.id}">+ Capture setup here</button><button class="btn" data-act="machineForm" data-id="${m.id}">Edit machine</button></div>
-  <div class="sec">Ask ${esc(ex)} <span class="cnt">${qa.filter(qaDone).length}/${qa.length}</span></div>
-  <p class="hint pad">The stuff that isn't tied to one part number. Type her answer or record her saying it.</p>
-  ${qa.map((x,i)=>`<div class="qa ${qaDone(x)?'done':''}"><div class="q">${esc(x.q)}</div><textarea rows="3" data-qa="${i}" data-mid="${m.id}" placeholder="Her answer…">${esc(x.a)}</textarea>${audioList(x.audio,'qa',`data-mid="${m.id}" data-qi="${i}"`)}<div class="recrow"><button class="btn rec sm" data-act="recQA" data-mid="${m.id}" data-qi="${i}">● Record</button><label class="btn ghost sm">Attach audio<input type="file" accept="audio/*" hidden data-file="qaAudio" data-mid="${m.id}" data-qi="${i}"></label></div></div>`).join('')}
+  <div class="sec">Ask the leadmen <span class="cnt">${qa.filter(qaDone).length}/${qa.length}</span></div>
+  <p class="hint pad">The stuff that isn't tied to one part number. Type the answer or record a leadman saying it.</p>
+  ${qa.map((x,i)=>`<div class="qa ${qaDone(x)?'done':''}"><div class="q">${esc(x.q)}</div><textarea rows="3" data-qa="${i}" data-mid="${m.id}" placeholder="Answer…">${esc(x.a)}</textarea>${audioList(x.audio,'qa',`data-mid="${m.id}" data-qi="${i}"`)}<div class="recrow"><button class="btn rec sm" data-act="recQA" data-mid="${m.id}" data-qi="${i}">● Record</button><label class="btn ghost sm">Attach audio<input type="file" accept="audio/*" hidden data-file="qaAudio" data-mid="${m.id}" data-qi="${i}"></label></div></div>`).join('')}
   <div class="qaadd"><input id="qaNew" placeholder="Add your own question…"><button class="btn sm" data-act="qaAdd" data-mid="${m.id}">Add</button></div>
   <div class="sec">Setups on this machine <span class="cnt">${ss.length}</span></div>
   ${ss.map(setupRow).join('')||'<p class="hint pad">None yet.</p>'}
@@ -785,8 +788,7 @@ function vGaps(){
   const missing=S.targets.filter(t=>!have.has(normPN(t))),covered=S.targets.length-missing.length;
   const gappy=S.setups.map(s=>[s,setupGaps(s)]).filter(x=>x[1].length).sort((a,b)=>b[1].length-a[1].length);
   const mq=S.machines.map(m=>[m,(m.qa||[]).filter(x=>!qaDone(x)).length]).filter(x=>x[1]);
-  const ex=S.settings.expert||'the expert';
-  return `<div class="meter"><div class="big">${ok}<small> / ${real.length} stamped</small></div><p>Setups ${esc(ex)} has checked and signed off.</p><div class="bar"><i style="width:${pct}%"></i></div></div>
+  return `<div class="meter"><div class="big">${ok}<small> / ${real.length} stamped</small></div><p>Setups a leadman has checked and signed off.</p><div class="bar"><i style="width:${pct}%"></i></div></div>
   ${S.targets.length?`<div class="meter"><div class="big">${covered}<small> / ${S.targets.length} parts covered</small></div><p>From the part list you pasted.</p><div class="bar"><i style="width:${Math.round(covered/S.targets.length*100)}%"></i></div></div>`:''}
   <div class="sec">Not in the book yet <span class="cnt">${missing.length}</span></div>
   ${S.targets.length?`<div class="pnchips">${missing.map(p=>`<span class="pnchip">${esc(p)}<button data-act="newSetup" data-pn="${esc(p)}">Capture</button></span>`).join('')||'<p class="hint">Every part on the list has a setup.</p>'}</div>`:'<p class="hint pad">Paste every part number that runs on these machines (from the router, ERP, or a spreadsheet column). The ones with no setup show up here.</p>'}
@@ -805,7 +807,7 @@ function vMore(){
   <div class="setrow">
   <label class="fl">Shop / department<input data-set="shop" value="${esc(S.settings.shop)}" placeholder="Shows in the header and on printed sheets"></label>
   <label class="fl">Your name<input data-set="me" value="${esc(S.settings.me)}"></label>
-  <label class="fl">The expert<input data-set="expert" value="${esc(S.settings.expert)}" placeholder="Her name goes on the verified stamp"></label></div>
+  <label class="fl">Leadmen<input data-set="expert" value="${esc(S.settings.expert)}" placeholder="Names, separated by commas. They sign off setups."></label></div>
   <div class="sec">Backup</div>
   <p class="hint pad">The book lives on this device. Back it up to your work email or drive, and import the file on another phone to copy the whole book over (photos and voice notes included). Last backup: <b>${ago(S.settings.lastBackup)}</b>.</p>
   <div class="btns"><button class="btn go" data-act="backup">Back up / restore</button></div>
@@ -870,7 +872,7 @@ async function wizSave(){
   const changed=d.isNew||snapshot(s)!==d.orig;
   if(changed)s.updated=now();
   if(d.isNew)s.created=s.updated;
-  if(d.stampNow){const by=S.settings.expert||'Expert';s.verified={by,init:initials(by),at:s.updated}}
+  if(d.stampNow){const by=String(d.stampBy||(leads().length===1?leads()[0]:'')).trim();if(!by){toast('Which leadman is signing it?');return}addLead(by);s.verified={by,init:initials(by),at:s.updated}}
   await Store.put('setups',s);upsert(S.setups,s);
   for(const b of d.removed||[])await delBlob(b);
   S.draft=null;clearTimeout(timers.draft);await Store.del('meta','draft');
@@ -891,9 +893,9 @@ async function loadDemo(){
   const s1=base({pn:'DEMO-44712-05',rev:'C',op:'Dimple 6x Ø.191',material:'2024-T3',thk:'.040',machineId:m1.id,upper:{toolId:t1.id,size:'3/16'},lower:{toolId:t2.id,size:'Flat wedge'},psi:'80',
     extraTools:[{label:'Shims',value:'.010 x2 under anvil'}],settings:[{label:'Hits per hole',value:'1'},{label:'Part orientation',value:'Flange up, tab toward you'}],
     steps:['Set regulator to 80 and cycle once empty.','Load part flange up, tab toward you.','Hit each hole once. Check the first dimple with a rivet before running the rest.'],
-    watch:'If the pin on the anvil is loose the dimple walks off center. Re-tape it before every run.',verified:{by:'Demo Expert',init:'DE',at:t}});
+    watch:'If the pin on the anvil is loose the dimple walks off center. Re-tape it before every run.',verified:{by:'Demo Leadman',init:'DL',at:t}});
   const s2=base({pn:'DEMO-44712-07',rev:'A',op:'Dimple 4x Ø.159',material:'2024-T3',thk:'.032',machineId:m1.id,upper:{toolId:t3.id,size:'5/32'},lower:{toolId:t4.id,size:'5/32'},psi:'75',steps:['Same as -05 but 75 PSI. Thinner material.']});
-  const s3=base({pn:'DEMO-90331-01',op:'Press bushing',material:'321 SS',machineId:m2.id,upper:{toolId:'',size:'Ø.375 pusher'},lower:{toolId:'',size:'5/8 cup die'},steps:['Lube the bushing.','Press flush, no more.'],verified:{by:'Demo Expert',init:'DE',at:t-3*86400000}});
+  const s3=base({pn:'DEMO-90331-01',op:'Press bushing',material:'321 SS',machineId:m2.id,upper:{toolId:'',size:'Ø.375 pusher'},lower:{toolId:'',size:'5/8 cup die'},steps:['Lube the bushing.','Press flush, no more.'],verified:{by:'Demo Leadman',init:'DL',at:t-3*86400000}});
   for(const m of [m1,m2]){await Store.put('machines',m);upsert(S.machines,m)}
   for(const x of [t1,t2,t3,t4]){await Store.put('tools',x);upsert(S.tools,x)}
   for(const x of [s1,s2,s3]){await Store.put('setups',x);upsert(S.setups,x)}
@@ -1054,13 +1056,13 @@ const A={
     await Store.del('setups',s.id);S.setups=S.setups.filter(x=>x.id!==s.id);go('#');toast('Deleted');
   },
   stampSetup:el=>{
-    openModal(`<h3>Stamp as verified</h3><p>She has looked over this sheet and it matches how she runs it.</p>
-    <label class="fl">Verified by<input id="stampBy" value="${esc(S.settings.expert)}" placeholder="Her name"></label>
+    openModal(`<h3>Stamp as verified</h3><p>A leadman looked over this sheet and it matches how the job runs.</p>
+    <label class="fl">Leadman<input id="stampBy" list="leadDL" value="${esc(leads().length===1?leads()[0]:'')}" placeholder="Leadman's name"></label>${leadList()}
     <div class="mbar"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn go" data-act="stampGo" data-id="${el.dataset.id}">Stamp it</button></div>`);
   },
   stampGo:async el=>{
     const by=$('#stampBy').value.trim();if(!by){toast('Who verified it?');return}
-    if(!S.settings.expert){S.settings.expert=by;saveSettings()}
+    addLead(by);
     const s=setupById(el.dataset.id);s.verified={by,init:initials(by),at:Math.max(now(),s.updated)};
     await Store.put('setups',s);closeModal();rerender();toast('Stamped');
   },
@@ -1116,7 +1118,8 @@ function onField(e){
     return;
   }
   if(el.dataset.set){S.settings[el.dataset.set]=el.value.trim();saveSettings();if(el.dataset.set==='shop')banners();return}
-  if(el.dataset.check==='stampNow'&&S.draft){S.draft.stampNow=el.checked;saveDraft();return}
+  if(el.dataset.check==='stampNow'&&S.draft){S.draft.stampNow=el.checked;saveDraft();rerender();return}
+  if(el.dataset.dstamp&&S.draft){S.draft.stampBy=el.value.trim();saveDraft();return}
   if(el.dataset.qa!==undefined){const m=machineById(el.dataset.mid),x=m.qa[+el.dataset.qa];x.a=el.value;m.updated=now();saveMachineSoon(m);el.closest('.qa').classList.toggle('done',qaDone(x));return}
   if(el.id==='q'&&e.type==='input'){S.q=el.value;$('#results').innerHTML=resultsHTML();return}
   if(el.id==='cq'&&e.type==='input'){S.cq=el.value;const q=el.value.toLowerCase();$('#tagList').innerHTML=S.tools.filter(t=>!q||[t.code,t.size,t.name,t.kind,t.loc].join(' ').toLowerCase().includes(q)).sort((a,b)=>toolLabel(a).localeCompare(toolLabel(b))).map(tagHTML).join('');return}
